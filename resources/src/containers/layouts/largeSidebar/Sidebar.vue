@@ -314,6 +314,15 @@
           </li>
            <li
             class="nav-item"
+            v-if="currentUserPermissions && currentUserPermissions.includes('barcode_view')"
+          >
+            <router-link tag="a" class to="/app/products/barcode">
+              <i class="nav-icon i-Bar-Code"></i>
+              <span class="item-name">{{$t('Printbarcode')}}</span>
+            </router-link>
+          </li>
+           <li
+            class="nav-item"
             v-if="('qrcode_view')"
           >
             <router-link tag="a" class to="/app/products/QRCode">

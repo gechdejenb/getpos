@@ -1,34 +1,41 @@
 const mix = require('laravel-mix');
-
-
-/*
- |--------------------------------------------------------------------------
- | Mix Asset Management
- |--------------------------------------------------------------------------
- |
- | Mix provides a clean, fluent API for defining some Webpack build steps
- | for your Laravel application. By default, we are compiling the Sass
- | file for the application as well as bundling up all the JS files.
- |
- */
-
 const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const {
+  CleanWebpackPlugin
+} = require('clean-webpack-plugin');
 
+mix.js('resources/src/main.js', 'public')
+  .js('resources/src/login.js', 'public')
+  .vue();
 
-mix.js('resources/src/main.js', 'public').js('resources/src/login.js', 'public')
-    .vue();
-
-    mix.webpackConfig({
-        output: {
-          
-            filename:'js/[name].min.js',
-            chunkFilename: 'js/bundle/[name].[hash].js',
-          },
-        plugins: [
-            new MomentLocalesPlugin(),
-            new CleanWebpackPlugin({
-                cleanOnceBeforeBuildPatterns: ['./js/*']
-              }),
-        ]
-    });
+// Replace the existing mix.webpackConfig block with this updated block
+mix.webpackConfig({
+  output: {
+    filename: 'js/[name].min.js',
+    chunkFilename: 'js/bundle/[name].[hash].js',
+  },
+  // module: {
+  //   rules: [{
+  //       test: /\.s[ac]ss$/i,
+  //       use: [
+  //         'style-loader',
+  //         'css-loader',
+  //         'postcss-loader',
+  //         {
+  //           loader: 'sass-loader',
+  //           options: {
+  //             implementation: require('sass'), // Use dart-sass
+  //           },
+  //         },
+  //       ],
+  //     },
+  //     // Add any other rules as needed for your project
+  //   ],
+  // },
+  plugins: [
+    new MomentLocalesPlugin(),
+    new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: ['./js/*'],
+    }),
+  ],
+});
