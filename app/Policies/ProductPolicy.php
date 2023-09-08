@@ -78,6 +78,11 @@ class ProductPolicy
         $permission = Permission::where('name', 'barcode_view')->first();
         return $user->hasRole($permission->roles);
     }
+      public function qrcode(User $user)
+    {
+        $permission = Permission::where('name', 'barcode_view')->first();
+        return $user->hasRole($permission->roles);
+    }
 
     public function Stock_Alerts(User $user)
     {

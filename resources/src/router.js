@@ -75,6 +75,15 @@ const routes = [
                                 /* webpackChunkName: "barcode" */ "./views/app/pages/products/barcode"
                             )
                     },
+                    {
+                        path: "qrcode",
+                        name: "qrcode",
+                        component: () =>
+                            import(
+                                /* webpackChunkName: "barcode" */
+                                "./views/app/pages/products/QRCode"
+                            )
+                    },
                      // categories
                      {
                         name: "categories",

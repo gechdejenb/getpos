@@ -154,6 +154,12 @@
               </div>
             </b-col>
           </b-row>
+          <div class="qr-code-section">
+            <button @click="generateQRCode" class="btn btn-primary btn-sm m-1">
+              Generate QR Code
+            </button>
+            <img v-if="qrCodeImageUrl" :src="qrCodeImageUrl" alt="QR Code" />
+          </div>
           </div>
       
 </template>
@@ -161,6 +167,8 @@
 <script>
 import VueBarcode from "vue-barcode";
 import NProgress from "nprogress";
+import QRCode from "qrcode"; // Import QRCode library
+
 export default {
   components: {
     barcode: VueBarcode
@@ -193,7 +201,9 @@ export default {
         code: "",
         Type_barcode: "",
         barcode:"",
-      }
+      },
+     qrCodeImageUrl: "" // To store the generated QR code image URL
+
     };
   },
   methods: {
@@ -238,6 +248,26 @@ export default {
       }
      
       this.Per_Page();
+    },
+     // Add the generateQRCode method
+    generateQRCode() {
+      const qrData = {
+        company: "Your Company Name",
+        website: "https://www.yourwebsite.com",
+        address: "123 Main St, City",
+        product: "Product Name",
+        expiration: "2023-12-31"
+      };
+
+      const qrText = JSON.stringify(qrData);
+
+      QRCode.toDataURL(qrText, (error, url) => {
+        if (error) {
+          console.error("QR Code generation error:", error);
+        } else {
+          this.qrCodeImageUrl = url;
+        }
+      });
     },
     //------ Validate Form
     submit() {

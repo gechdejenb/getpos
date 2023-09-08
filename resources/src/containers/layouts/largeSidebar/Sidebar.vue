@@ -29,7 +29,7 @@
             && (currentUserPermissions.includes('products_add')
             || currentUserPermissions.includes('products_view') 
             || currentUserPermissions.includes('barcode_view')
-            || ('arcode_view')
+            || ('qrcode_view')
              || currentUserPermissions.includes('brand') 
              || currentUserPermissions.includes('unit')  
              || currentUserPermissions.includes('category'))"
@@ -312,24 +312,15 @@
               <span class="item-name">{{$t('Printbarcode')}}</span>
             </router-link>
           </li>
-           <li
-            class="nav-item"
-            v-if="currentUserPermissions && currentUserPermissions.includes('barcode_view')"
-          >
-            <router-link tag="a" class to="/app/products/barcode">
-              <i class="nav-icon i-Bar-Code"></i>
-              <span class="item-name">{{$t('Printbarcode')}}</span>
-            </router-link>
-          </li>
-           <li
-            class="nav-item"
-            v-if="('qrcode_view')"
-          >
-            <router-link tag="a" class to="/app/products/QRCode">
-              <i class="nav-icon i-Bar-Code"></i>
-              <span class="item-name">{{$t('Printbarcode')}}</span>
-            </router-link>
-          </li>
+          
+       <li class="nav-item">
+          <router-link :to="{ name: 'qrcode' }" tag="a">
+              <i class="nav-icon fas fa-qrcode"></i> <!-- Replace 'fas fa-qrcode' with the actual FontAwesome class for a QR code icon -->
+              <span class="item-name">{{$t('Printqrcode')}}</span>
+          </router-link>
+      </li>
+
+
            <li
             class="nav-item"
             v-if="currentUserPermissions && currentUserPermissions.includes('category')"

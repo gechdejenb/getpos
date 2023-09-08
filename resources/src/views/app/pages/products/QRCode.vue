@@ -1,74 +1,65 @@
 <template>
   <div class="main-content">
-    <!-- ... Your existing template code ... -->
+    <!-- Form for User Input -->
+    <form @submit.prevent="generateQRCode">
+      <div class="form-group">
+        <label for="website">Website:</label>
+        <input type="text" class="form-control" v-model="formData.website" required>
+      </div>
+      <div class="form-group">
+        <label for="productName">Product Name:</label>
+        <input type="text" class="form-control" v-model="formData.productName" required>
+      </div>
+      <div class="form-group">
+        <label for="address">Address:</label>
+        <input type="text" class="form-control" v-model="formData.address" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" class="form-control" v-model="formData.email" required>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone:</label>
+        <input type="tel" class="form-control" v-model="formData.phone" required>
+      </div>
 
-    <!-- QR Code Section -->
-    <div class="qr-code-section">
-      <button @click="generateQRCode" class="btn btn-primary btn-sm m-1">
-        Generate QR Code
-      </button>
-      <img v-if="qrCodeImageUrl" :src="qrCodeImageUrl" alt="QR Code" />
+      <button type="submit" class="btn btn-primary">Generate QR Code</button>
+    </form>
+
+    <!-- Display QR Code -->
+    <div class="qr-code-section" v-if="qrCodeImageUrl">
+      <qrcode-vue :value="qrCodeImageUrl" :size="qrCodeSize" level="H" />
+      <button @click="downloadQRCode" class="btn btn-primary mt-3">Download QR Code</button>
     </div>
   </div>
 </template>
 
 <script>
-import VueBarcode from "vue-barcode";
-import NProgress from "nprogress";
-import QRCode from "qrcode"; // Import QRCode library
+import QrcodeVue from 'qrcode.vue';
+import QRCode from 'qrcode';
 
 export default {
-  components: {
-    barcode: VueBarcode
-  },
   data() {
     return {
-      focused: false,
-      timer: null,
-      search_input: "",
-      product_filter: [],
-      isLoading: true,
-      ShowCard: false,
-      barcode: {
-        product_id: "",
-        warehouse_id: "",
-        qte: 10
+      formData: {
+        website: '',
+        productName: '',
+        address: '',
+        email: '',
+        phone: ''
       },
-      count: "",
-      paper_size: "",
-      sheets: "",
-      total_a4: "",
-      class_sheet: "",
-      class_type_page: "",
-      rest: "",
-      warehouses: [],
-      submitStatus: null,
-      products: [],
-      product: {
-        name: "",
-        code: "",
-        Type_barcode: "",
-        barcode: ""
-      },
-      qrCodeImageUrl: "" // To store the generated QR code image URL
+      qrCodeImageUrl: null,
+      qrCodeSize: 200
     };
   },
+  components: {
+    QrcodeVue
+  },
   methods: {
-    // ... Your existing methods ...
-
-    // Add the generateQRCode method
     generateQRCode() {
-      const qrData = {
-        company: "Your Company Name",
-        website: "https://www.yourwebsite.com",
-        address: "123 Main St, City",
-        product: "Product Name",
-        expiration: "2023-12-31"
-      };
+      const qrData = JSON.stringify(this.formData);
 
-      const qrText = JSON.stringify(qrData);
-
-      QRCode.toDataURL(qrText, (error, url) => {
+      QRCode.toDataURL(qrData, (error, url) => {
         if (error) {
           console.error("QR Code generation error:", error);
         } else {
@@ -77,11 +68,16 @@ export default {
       });
     },
 
-    // ... Your existing methods ...
-  },
-
-  // ... The rest of your script ...
+    downloadQRCode() {
+      if (this.qrCodeImageUrl) {
+        const link = document.createElement('a');
+        link.href = this.qrCodeImageUrl;
+        link.download = 'qrcode.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+  }
 };
 </script>
-
-<!-- ... Your existing style ... -->
