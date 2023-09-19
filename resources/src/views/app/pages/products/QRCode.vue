@@ -45,8 +45,8 @@ export default {
         website: 'https://zemayimpex.com/',
         productName: '',
         address: 'Wereda 07,Kolfe Keranyo Subcity,Addis Ababa,Ethiopia',
-        email: 'seidmohamed9307@gmail.com',
-        phone: '+251 91 161 9033'
+        email: 'contact@zemayimpex.com',
+        phone: '+251 91 161 9033 / +251920269069/ +251977320433'
       },
       qrCodeImageUrl: null,
       qrCodeSize: 200
