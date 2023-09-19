@@ -2,29 +2,29 @@
   <div class="main-content">
     <!-- Form for User Input -->
     <form @submit.prevent="generateQRCode">
-      <div class="form-group">
-        <label for="website">Website:</label>
-        <input type="text" class="form-control" v-model="formData.website" required>
-      </div>
-      <div class="form-group">
-        <label for="productName">Product Name:</label>
-        <input type="text" class="form-control" v-model="formData.productName" required>
-      </div>
-      <div class="form-group">
-        <label for="address">Address:</label>
-        <input type="text" class="form-control" v-model="formData.address" required>
-      </div>
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" class="form-control" v-model="formData.email" required>
-      </div>
-      <div class="form-group">
-        <label for="phone">Phone:</label>
-        <input type="tel" class="form-control" v-model="formData.phone" required>
-      </div>
+    <div class="form-group">
+      <label for="website">Website:</label>
+      <input type="text" class="form-control" v-model="formData.website" required>
+    </div>
+    <div class="form-group">
+      <label for="productName">Product Name:</label>
+      <input type="text" class="form-control" v-model="formData.productName" required>
+    </div>
+    <div class="form-group">
+      <label for="address">Address:</label>
+      <input type="text" class="form-control" v-model="formData.address" required>
+    </div>
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="email" class="form-control" v-model="formData.email" required>
+    </div>
+    <div class="form-group">
+      <label for="phone">Phone:</label>
+      <input type="tel" class="form-control" v-model="formData.phone" required>
+    </div>
 
-      <button type="submit" class="btn btn-primary">Generate QR Code</button>
-    </form>
+    <button type="submit" class="btn btn-primary">Generate QR Code</button>
+  </form>
 
     <!-- Display QR Code -->
     <div class="qr-code-section" v-if="qrCodeImageUrl">
@@ -42,11 +42,11 @@ export default {
   data() {
     return {
       formData: {
-        website: '',
+        website: 'https://zemayimpex.com/',
         productName: '',
-        address: '',
-        email: '',
-        phone: ''
+        address: 'Wereda 07,Kolfe Keranyo Subcity,Addis Ababa,Ethiopia',
+        email: 'seidmohamed9307@gmail.com',
+        phone: '+251 91 161 9033'
       },
       qrCodeImageUrl: null,
       qrCodeSize: 200
