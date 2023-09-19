@@ -94,30 +94,27 @@ Route::get('password/find/{token}', 'PasswordResetController@find');
 //         abort(403);
 //     });
 // }
-
+ Route::any('/setup/{vue}', function () {
+        abort(403);
+    });
 //------------------------------------------------------------------\\
 
 Route::group(['middleware' => ['auth', 'Is_Active']], function () {
 
     Route::get('/login', function () {
         $installed = Storage::disk('public')->exists('installed');
-        if ($installed === false) {
-            return redirect('/setup');
-        } else {
+       
             return redirect('/login');
-        }
+        
     });
 
 
     Route::get('/{vue?}',
         function () {
-            $installed = Storage::disk('public')->exists('installed');
 
-            if ($installed === false) {
-                return redirect('/setup');
-            } else {
+            
                 return view('layouts.master');
-            }
+            
         })->where('vue', '^(?!api|setup|update|password).*$');
 
 
