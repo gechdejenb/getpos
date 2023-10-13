@@ -639,7 +639,7 @@ export default {
         .then(async response => {
          
           const product = response.data.products;
-          this.products = product;
+          // this.products = product;
           this.warehouses = response.data.warehouses;
           this.categories = response.data.categories;
           this.brands = response.data.brands;
