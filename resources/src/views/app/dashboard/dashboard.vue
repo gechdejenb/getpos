@@ -3,20 +3,193 @@
   <div class="main-content">
     <div v-if="loading" class="loading_page spinner spinner-primary mr-3"></div>
     <div v-else-if="!loading && currentUserPermissions && currentUserPermissions.includes('dashboard')">
-      <!-- warehouse -->
+
       <b-row>
-        <b-col lg="4" md="4" sm="12">
-          <b-form-group :label="$t('Filter_by_warehouse')">
-            <v-select
-              @input="Selected_Warehouse"
-              v-model="warehouse_id"
-              :reduce="label => label.value"
-              :placeholder="$t('Choose_Warehouse')"
-              :options="warehouses.map(warehouses => ({label: warehouses.name, value: warehouses.id}))"
-            />
-          </b-form-group>
+        <!-- ICON BG Tiles for menus -->
+
+        <b-col lg="3" md="6" sm="12">
+          <router-link tag="a" class to="/app/sales/list">
+            <b-card class="card-icon-bg card-icon-bg-primary o-hidden mb-30 red text-center">
+              <i class="i-Full-Cart"></i>
+              <div class="content">
+                <p class="text-muted mt-2 mb-0">{{$t('Sales')}}</p>
+                <!-- <p
+                  class="text-primary text-24 line-height-1 mb-2"
+                >{{currentUser.currency}} {{report_today.today_sales?report_today.today_sales:0}}</p> -->
+              </div>
+            </b-card>
+          </router-link>
+        </b-col>
+
+        <b-col lg="3" md="6" sm="12">
+          <router-link tag="a" class to="/app/purchases/list">
+            <b-card class="card-icon-bg card-icon-bg-primary o-hidden mb-30 green text-center">
+              <i class="i-Add-Cart"></i>
+              <div class="content">
+                <p class="text-muted mt-2 mb-0">{{$t('Purchases')}}</p>
+                <!-- <p
+                  class="text-primary text-24 line-height-1 mb-2"
+                >{{currentUser.currency}} {{report_today.today_purchases?report_today.today_purchases:0}}</p> -->
+              </div>
+            </b-card>
+          </router-link>
+        </b-col>
+
+        <b-col lg="3" md="6" sm="12">
+          <router-link tag="a" class to="/app/sale_return/list">
+            <b-card class="card-icon-bg card-icon-bg-primary o-hidden mb-30 orange text-center">
+              <i class="i-Right-4"></i>
+              <div class="content">
+                <p class="text-muted mt-2 mb-0">{{$t('Import')}}</p>
+                <!-- <p
+                  class="text-primary text-24 line-height-1 mb-2"
+                >{{currentUser.currency}} {{report_today.return_sales?report_today.return_sales:0}}</p> -->
+              </div>
+            </b-card>
+          </router-link>
+        </b-col>
+
+        <b-col lg="3" md="6" sm="12">
+          <router-link tag="a" class to="/app/purchase_return/list">
+            <b-card class="card-icon-bg card-icon-bg-primary o-hidden mb-30 blue text-center">
+              <i class="i-Left-4"></i>
+              <div class="content">
+                <p class="text-muted mt-2 mb-0">{{$t('Export')}}</p>
+                <!-- <p
+                  class="text-primary text-24 line-height-1 mb-2"
+                >{{currentUser.currency}} {{report_today.return_purchases?report_today.return_purchases:0}}</p> -->
+              </div>
+            </b-card>
+          </router-link>
+        </b-col>
+<b-col lg="3" md="6" sm="12">
+          <router-link tag="a" class to="/app/sales/list">
+            <b-card class="card-icon-bg card-icon-bg-primary o-hidden mb-30 graw text-center">
+              <i class="i-Full-Cart"></i>
+              <div class="content">
+                <p class="text-muted mt-2 mb-0">{{$t('Sales')}}</p>
+                <!-- <p
+                  class="text-primary text-24 line-height-1 mb-2"
+                >{{currentUser.currency}} {{report_today.today_sales?report_today.today_sales:0}}</p> -->
+              </div>
+            </b-card>
+          </router-link>
+        </b-col>
+
+        <b-col lg="3" md="6" sm="12">
+          <router-link tag="a" class to="/app/purchases/list">
+            <b-card class="card-icon-bg card-icon-bg-primary o-hidden mb-30 yellow text-center">
+              <i class="i-Add-Cart"></i>
+              <div class="content">
+                <p class="text-muted mt-2 mb-0">{{$t('POS')}}</p>
+                <!-- <p
+                  class="text-primary text-24 line-height-1 mb-2"
+                >{{currentUser.currency}} {{report_today.today_purchases?report_today.today_purchases:0}}</p> -->
+              </div>
+            </b-card>
+          </router-link>
+        </b-col>
+
+        <b-col lg="3" md="6" sm="12">
+          <router-link tag="a" class to="/app/sale_return/list">
+            <b-card class="card-icon-bg card-icon-bg-primary o-hidden mb-30 green text-center">
+              <i class="i-Right-4"></i>
+              <div class="content">
+                <p class="text-muted mt-2 mb-0">{{$t('Warehouse Adjustment')}}</p>
+                <!-- <p
+                  class="text-primary text-24 line-height-1 mb-2"
+                >{{currentUser.currency}} {{report_today.return_sales?report_today.return_sales:0}}</p> -->
+              </div>
+            </b-card>
+          </router-link>
+        </b-col>
+
+        <b-col lg="3" md="6" sm="12">
+          <router-link tag="a" class to="/app/purchase_return/list">
+            <b-card class="card-icon-bg card-icon-bg-primary o-hidden mb-30 orange text-center">
+              <i class="i-Left-4"></i>
+              <div class="content">
+                <p class="text-muted mt-2 mb-0">{{$t('Stock Transfer')}}</p>
+                <!-- <p
+                  class="text-primary text-24 line-height-1 mb-2"
+                >{{currentUser.currency}} {{report_today.return_purchases?report_today.return_purchases:0}}</p> -->
+              </div>
+            </b-card>
+          </router-link>
+        </b-col>
+         <b-col lg="3" md="6" sm="12">
+          <router-link tag="a" class to="/app/sales/list">
+            <b-card class="card-icon-bg card-icon-bg-primary o-hidden mb-30 blue text-center">
+              <i class="i-Full-Cart"></i>
+              <div class="content">
+                <p class="text-muted mt-2 mb-0">{{$t('Sales')}}</p>
+                <!-- <p
+                  class="text-primary text-24 line-height-1 mb-2"
+                >{{currentUser.currency}} {{report_today.today_sales?report_today.today_sales:0}}</p> -->
+              </div>
+            </b-card>
+          </router-link>
+        </b-col>
+
+        <b-col lg="3" md="6" sm="12">
+          <router-link tag="a" class to="/app/purchases/list">
+            <b-card class="card-icon-bg card-icon-bg-primary o-hidden mb-30 green text-center">
+              <i class="i-Add-Cart"></i>
+              <div class="content">
+                <p class="text-muted mt-2 mb-0">{{$t('Purchases')}}</p>
+                <!-- <p
+                  class="text-primary text-24 line-height-1 mb-2"
+                >{{currentUser.currency}} {{report_today.today_purchases?report_today.today_purchases:0}}</p> -->
+              </div>
+            </b-card>
+          </router-link>
+        </b-col>
+
+        <b-col lg="3" md="6" sm="12">
+          <router-link tag="a" class to="/app/sale_return/list">
+            <b-card class="card-icon-bg card-icon-bg-primary o-hidden mb-30 orange text-center">
+              <i class="i-Right-4"></i>
+              <div class="content">
+                <p class="text-muted mt-2 mb-0">{{$t('Import')}}</p>
+                <!-- <p
+                  class="text-primary text-24 line-height-1 mb-2"
+                >{{currentUser.currency}} {{report_today.return_sales?report_today.return_sales:0}}</p> -->
+              </div>
+            </b-card>
+          </router-link>
+        </b-col>
+
+        <b-col lg="3" md="6" sm="12">
+          <router-link tag="a" class to="/app/purchase_return/list">
+            <b-card class="card-icon-bg card-icon-bg-primary o-hidden mb-30 red text-center">
+              <i class="i-Left-4"></i>
+              <div class="content">
+                <p class="text-muted mt-2 mb-0">{{$t('Export')}}</p>
+                <!-- <p
+                  class="text-primary text-24 line-height-1 mb-2"
+                >{{currentUser.currency}} {{report_today.return_purchases?report_today.return_purchases:0}}</p> -->
+              </div>
+            </b-card>
+          </router-link>
         </b-col>
       </b-row>
+      <!-- warehouse -->
+  <b-row>
+      <!-- warehouse -->
+      <b-col lg="4" md="4" sm="12">
+        <b-form-group :label="$t('Filter_by_warehouse')">
+          <v-select
+            @input="Selected_Warehouse"
+            v-model="warehouse_id"
+            :reduce="label => label.value"
+            :placeholder="$t('Choose_Warehouse')"
+            :options="warehouses.map(warehouses => ({label: warehouses.name, value: warehouses.id}))"
+            id="warehouse-select"
+          />
+        </b-form-group>
+      </b-col>
+    </b-row>
+
 
       <b-row>
         <!-- ICON BG -->

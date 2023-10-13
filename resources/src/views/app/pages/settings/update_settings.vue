@@ -76,10 +76,10 @@
                      </div>
 
                      <div class="col-md-12 mt-3">
-                       <h4 class="mb-3">This video showing you the steps on how to upgrade stocky</h4>
+                       <h4 class="mb-3">This video showing you the steps on how to upgrade getpos</h4>
 
                        <iframe width="853" height="480" src="https://www.youtube.com/embed/VwfRtMkxS9U"
-                          title="how to update Stocky step by step" frameborder="0" 
+                          title="how to update getpos step by step" frameborder="0" 
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowfullscreen>
                         </iframe>

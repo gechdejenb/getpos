@@ -154,12 +154,12 @@
               </div>
             </b-col>
           </b-row>
-          <div class="qr-code-section">
+          <!-- <div class="qr-code-section">
             <button @click="generateQRCode" class="btn btn-primary btn-sm m-1">
               Generate QR Code
             </button>
             <img v-if="qrCodeImageUrl" :src="qrCodeImageUrl" alt="QR Code" />
-          </div>
+          </div> -->
           </div>
       
 </template>

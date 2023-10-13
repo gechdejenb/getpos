@@ -23,6 +23,8 @@
         "cross-env": "^7.0.3",
         "echarts": "^4.9.0",
         "es6-promise": "^4.2.8",
+        "idb": "^7.1.1",
+        "idb-keyval": "^6.2.1",
         "jspdf": "^2.3.0",
         "jspdf-autotable": "^3.5.23",
         "jspdf-html2canvas": "^1.4.9",

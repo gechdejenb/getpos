@@ -531,6 +531,7 @@ export default {
         .get("adjustments/create")
         .then(response => {
           this.warehouses = response.data.warehouses;
+          console.log('Warehouses: ', this.warehouses);
           this.isLoading = false;
         })
         .catch(response => {

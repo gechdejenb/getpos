@@ -39,6 +39,17 @@
       'Image' => 'Intervention\\Image\\Facades\\Image',
     ),
   ),
+  'ladumor/laravel-pwa' => 
+  array (
+    'providers' => 
+    array (
+      0 => '\\Ladumor\\LaravelPwa\\PWAServiceProvider',
+    ),
+    'aliases' => 
+    array (
+      'LaravelPwa' => 'Ladumor\\LaravelPwa\\LaravelPwa',
+    ),
+  ),
   'laravel/passport' => 
   array (
     'providers' => 

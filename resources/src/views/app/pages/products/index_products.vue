@@ -304,6 +304,11 @@ import { mapActions, mapGetters } from "vuex";
 import NProgress from "nprogress";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import IndexedDBHelper from './IndexedDBHelper.js';
+// Define your upgrade callback function
+function upgradeDB(db, oldVersion, newVersion, transaction) {
+    // Handle upgrades here if needed
+}
 
 export default {
   metaInfo: {
@@ -578,39 +583,97 @@ export default {
       }
     },
 
+    // -------------------------------For offline use ..............\\
+    async saveProductsToIndexedDB(products) {
+      const indexedDBHelper = new IndexedDBHelper('ProductDB', 'products');
+      await indexedDBHelper.openDatabase();
+      await indexedDBHelper.saveProducts(products);
+    },
+
+    async loadProductsFromIndexedDB() {
+      const indexedDBHelper = new IndexedDBHelper('ProductDB', 'products');
+      await indexedDBHelper.openDatabase();
+      const products = await indexedDBHelper.getProducts();
+      // Do something with the products loaded from IndexedDB
+    },
+
+
     //----------------------------------- Get All Products ------------------------------\\
-    Get_Products(page) {
+    async Get_Products(page) {
+      // const indexedDBHelper = new IndexedDBHelper('ProductDB', 'products');
+      // await indexedDBHelper.openDatabase();
+    const dbName = 'ProductsDBs'; // Specify your database name
+    const storeName = 'products'; // Specify your store name
+    // Create an instance of IndexedDBHelper
+      const indexedDBHelper = new IndexedDBHelper(dbName,1, storeName);
+      
+    
+
       // Start the progress bar.
       NProgress.start();
       NProgress.set(0.1);
+      const isOnline = navigator.onLine;
+      if (isOnline) {
       this.setToStrings();
       axios
         .get(
           "products?page=" +
-            page +
-            "&code=" +
-            this.Filter_code +
-            "&name=" +
-            this.Filter_name +
-            "&category_id=" +
-            this.Filter_category +
-            "&brand_id=" +
-            this.Filter_brand +
-            "&SortField=" +
-            this.serverParams.sort.field +
-            "&SortType=" +
-            this.serverParams.sort.type +
-            "&search=" +
-            this.search +
-            "&limit=" +
-            this.limit
+          page +
+          "&code=" +
+          this.Filter_code +
+          "&name=" +
+          this.Filter_name +
+          "&category_id=" +
+          this.Filter_category +
+          "&brand_id=" +
+          this.Filter_brand +
+          "&SortField=" +
+          this.serverParams.sort.field +
+          "&SortType=" +
+          this.serverParams.sort.type +
+          "&search=" +
+          this.search +
+          "&limit=" +
+          this.limit
         )
-        .then(response => {
-          this.products = response.data.products;
+        .then(async response => {
+         
+          const product = response.data.products;
+          this.products = product;
           this.warehouses = response.data.warehouses;
           this.categories = response.data.categories;
           this.brands = response.data.brands;
           this.totalRows = response.data.totalRows;
+          console.log('Products:', this.products);
+
+
+       indexedDBHelper.openDatabase()
+        .then(db => {
+            // Database is now open and ready to use
+            console.log('Database opened successfully!');
+
+            // Save products to the database
+            indexedDBHelper.saveData(product)
+                .then(() => {
+                    console.log('Products saved successfully!');
+
+                    // Retrieve products from the database
+                    indexedDBHelper.getData()
+                        .then(products => {
+                          console.log('Retrieved products:', products);
+                          this.products = products;
+                        })
+                        .catch(error => {
+                            console.error('Error getting products:', error);
+                        });
+                })
+                .catch(error => {
+                    console.error('Error saving products:', error);
+                });
+        })
+        .catch(error => {
+            console.error('Error opening database:', error);
+        });
 
           // Complete the animation of theprogress bar.
           NProgress.done();
@@ -623,6 +686,28 @@ export default {
             this.isLoading = false;
           }, 500);
         });
+    }
+
+      else {
+      //     try {
+      //   const products = await indexedDBHelper.getAllData('products');
+      //   const warehouses = await indexedDBHelper.getAllData('warehouses');
+      //   const categories = await indexedDBHelper.getAllData('categories');
+      //   const brands = await indexedDBHelper.getAllData('brands');
+      //   this.products = products;
+      //   this.warehouses = warehouses;
+      //   this.categories = categories;
+      //   this.brands = brands;
+
+      //   // Log the fetched data
+      //   console.log('Products from IndexedDB:', products);
+      //   console.log('Warehouses from IndexedDB:', warehouses);
+      //   console.log('Categories from IndexedDB:', categories);
+      //   console.log('Brands from IndexedDB:', brands);
+      // } catch (error) {
+      //   console.error('Error fetching data from IndexedDB:', error);
+      // }
+      }
     },
 
     //----------------------------------- Remove Product ------------------------------\\
@@ -725,6 +810,7 @@ export default {
         this.$bvModal.hide("importProducts");
       }, 500);
     });
-  }
+  },
+  
 };
 </script>

@@ -447,19 +447,35 @@ export default {
 
   methods: {
     //------------- Submit Validation Create Product
-    Submit_Product() {
-      this.$refs.Create_Product.validate().then(success => {
-        if (!success) {
-          this.makeToast(
-            "danger",
-            this.$t("Please_fill_the_form_correctly"),
-            this.$t("Failed")
-          );
-        } else {
-          this.Create_Product();
-        }
-      });
-    },
+    //  async Submit_Product() {
+    //   this.$refs.Create_Product.validate().then(success => {
+    //     if (!success) {
+    //       this.makeToast(
+    //         "danger",
+    //         this.$t("Please_fill_the_form_correctly"),
+    //         this.$t("Failed")
+    //       );
+    //     } else {
+    //       if (navigator.onLine) {
+    //         // Online: Proceed with creating the product
+    //         this.Create_Product();
+    //       } else {
+    //         // Offline: Save the product data to localStorage
+    //         const offlineProductData = {
+    //           product: this.product,
+    //           variants: this.variants,
+    //           images: this.images,
+    //         };
+    //         localStorage.setItem("offlineProductData", JSON.stringify(offlineProductData));
+    //         this.makeToast(
+    //           "info",
+    //           this.$t("Product data saved for synchronization when online."),
+    //           this.$t("Offline")
+    //         );
+    //       }
+    //     }
+    //   });
+    // },
 
     //------ Toast
     makeToast(variant, msg, title) {
@@ -531,68 +547,130 @@ export default {
       this.product.unit_purchase_id = "";
       this.Get_Units_SubBase(value);
     },
+    async syncDataWhenOnline() {
+      if (navigator.onLine) {
+        const offlineProductData = JSON.parse(localStorage.getItem("offlineProductData"));
+        if (offlineProductData) {
+          try {
+            const response = await axios.post("products", offlineProductData);
+            console.log('Data synchronized with server:', response.data);
+            localStorage.removeItem("offlineProductData");
+            this.makeToast(
+              "success",
+              this.$t("Product data synchronized with the server."),
+              this.$t("Online")
+            );
+          } catch (error) {
+            console.error('Error synchronizing data:', error);
+            this.makeToast(
+              "danger",
+              this.$t("Error synchronizing product data with the server."),
+              this.$t("Online")
+            );
+          }
+        }
+      }
+    },
 
     //------------------------------ Create new Product ------------------------------\\
-    Create_Product() {
-      // Start the progress bar.
-      NProgress.start();
-      NProgress.set(0.1);
-      var self = this;
-      self.SubmitProcessing = true;
+   async Create_Product() {
+  NProgress.start();
+  NProgress.set(0.1);
+  var self = this;
+  self.SubmitProcessing = true;
 
-      if (self.product.is_variant && self.variants.length <= 0) {
-        self.product.is_variant = false;
-      }
-      // append objet product
-      Object.entries(self.product).forEach(([key, value]) => {
-        self.data.append(key, value);
-      });
+  if (self.product.is_variant && self.variants.length <= 0) {
+    self.product.is_variant = false;
+  }
+  // append object product
+  Object.entries(self.product).forEach(([key, value]) => {
+    self.data.append(key, value);
+  });
 
-      // append array variants
-      if (self.variants.length) {
-        for (var i = 0; i < self.variants.length; i++) {
-          self.data.append("variants[" + i + "]", self.variants[i].text);
-        }
-      }
-      //append array images
-      if (self.images.length > 0) {
-        for (var k = 0; k < self.images.length; k++) {
-          Object.entries(self.images[k]).forEach(([key, value]) => {
-            self.data.append("images[" + k + "][" + key + "]", value);
-          });
-        }
-      }
-
-      // Send Data with axios
-      axios
-        .post("products", self.data)
-        .then(response => {
-          // Complete the animation of theprogress bar.
-          NProgress.done();
-          self.SubmitProcessing = false;
-          this.$router.push({ name: "index_products" });
-          this.makeToast(
-            "success",
-            this.$t("Successfully_Created"),
-            this.$t("Success")
-          );
-        })
-        .catch(error => {
-          // Complete the animation of theprogress bar.
-          NProgress.done();
-          if (error.errors.code.length > 0) {
-            self.code_exist = error.errors.code[0];
-          }
-          this.makeToast("danger", this.$t("InvalidData"), this.$t("Failed"));
-          self.SubmitProcessing = false;
-        });
+  // append array variants
+  if (self.variants.length) {
+    for (var i = 0; i < self.variants.length; i++) {
+      self.data.append("variants[" + i + "]", self.variants[i].text);
     }
-  }, //end Methods
+  }
+  // append array images
+  if (self.images.length > 0) {
+    for (var k = 0; k < self.images.length; k++) {
+      Object.entries(self.images[k]).forEach(([key, value]) => {
+        self.data.append("images[" + k + "][" + key + "]", value);
+      });
+    }
+  }
+
+  // Send Data with axios
+  try {
+    await axios.post("products", self.data); // Replace "products" with your API endpoint
+    // Complete the animation of the progress bar.
+    NProgress.done();
+    self.SubmitProcessing = false;
+    this.$router.push({ name: "index_products" }); // Redirect to the appropriate route
+    this.makeToast(
+      "success",
+      this.$t("Successfully_Created"),
+      this.$t("Success")
+    );
+  } catch (error) {
+    // Complete the animation of the progress bar.
+    NProgress.done();
+    if (error.response && error.response.data.errors && error.response.data.errors.code) {
+      self.code_exist = error.response.data.errors.code[0];
+    }
+    this.makeToast("danger", this.$t("InvalidData"), this.$t("Failed"));
+    self.SubmitProcessing = false;
+  }
+},
+
+  async Submit_Product() {
+  this.$refs.Create_Product.validate().then(success => {
+    if (!success) {
+      this.makeToast(
+        "danger",
+        this.$t("Please_fill_the_form_correctly"),
+        this.$t("Failed")
+      );
+    } else {
+      if (navigator.onLine) {
+        // Online: Proceed with creating the product
+        this.Create_Product();
+      } else {
+        // Offline: Save the product data to localStorage
+        const offlineProductData = {
+          product: this.product,
+          variants: this.variants,
+          images: this.images,
+        };
+        localStorage.setItem("offlineProductData", JSON.stringify(offlineProductData));
+        this.makeToast(
+          "info",
+          this.$t("Product data saved for synchronization when online."),
+          this.$t("Offline")
+        );
+      }
+    }
+  });
+},
+
+  },
+  //end Methods
 
   //-----------------------------Created function-------------------
 
-  created: function() {
+ created() {
     this.GetElements();
-  }
+  },
+
+  // Listen for online event and call syncDataWhenOnline
+  mounted() {
+    window.addEventListener("online", this.syncDataWhenOnline);
+  },
+
+  beforeDestroy() {
+    window.removeEventListener("online", this.syncDataWhenOnline);
+  },
 };
 </script>

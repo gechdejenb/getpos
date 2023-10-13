@@ -1,0 +1,15 @@
+{
+  "name": "GetPos",
+  "short_name": "GetPos",
+  "start_url": "/",
+  "background_color": "#013220",
+  "description": "GetPos Inventory Managements and POS System",
+  "display": "fullscreen",
+  "theme_color": "#013220",
+  "icons": [{
+    "src": "/images/logo.png",
+    "sizes": "512x512",
+    "type": "image/png",
+    "purpose": "any maskable"
+  }]
+}

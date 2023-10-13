@@ -42,11 +42,11 @@ export default {
   data() {
     return {
       formData: {
-        website: 'https://zemayimpex.com/',
+        website: 'https://eco.com/',
         productName: '',
-        address: 'Wereda 07,Kolfe Keranyo Subcity,Addis Ababa,Ethiopia',
-        email: 'contact@zemayimpex.com',
-        phone: '+251 91 161 9033 / +251920269069/ +251977320433'
+        address: 'Wereda _,Bole Subcity,Addis Ababa,Ethiopia',
+        email: 'sales@eco.com',
+        phone: '+251911****** / +251911******/ +251911******'
       },
       qrCodeImageUrl: null,
       qrCodeSize: 200
