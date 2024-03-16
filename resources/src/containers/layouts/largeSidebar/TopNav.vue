@@ -22,6 +22,8 @@
       >
       <span class="ul-btn__text ml-1">POS</span>
       </router-link>
+      <!-- <Calculator /> -->
+
       <!-- Full screen toggle -->
       <i class="i-Full-Screen header-icon d-none d-sm-inline-block" @click="handleFullScreen"></i>
       <!-- Grid menu Dropdown -->
@@ -142,11 +144,12 @@ import { mapGetters, mapActions } from "vuex";
 import { mixin as clickaway } from "vue-clickaway";
 // import { setTimeout } from 'timers';
 import FlagIcon from "vue-flag-icon";
-
+import Calculator from "./Calculator.vue"
 export default {
   mixins: [clickaway],
   components: {
-    FlagIcon
+    FlagIcon,
+    Calculator
   },
 
   data() {
@@ -212,6 +215,7 @@ export default {
       this.$store.dispatch("language/setLanguage", locale);
       Fire.$emit("ChangeLanguage");
     },
+    
 
     handleFullScreen() {
       Util.toggleFullScreen();

@@ -16,9 +16,9 @@ class CurrencySeeder extends Seeder
         DB::table('currencies')->insert(
             array(
                 'id'     => 1,
-                'code'   => 'USD',
-                'name'   => 'US Dollar',
-                'symbol' => '$',
+                'code'   => 'ETB',
+                'name'   => 'Ethiopian Birr',
+                'symbol' => 'Birr',
             )
             
         );

@@ -61,6 +61,23 @@
             </a>
             <div class="triangle"></div>
           </li>
+          <!-- <li
+            v-show="currentUserPermissions && (currentUserPermissions.includes('Sales_view') 
+                        || currentUserPermissions.includes('Sales_add')
+                        || currentUserPermissions.includes('Pos_view')
+                        || currentUserPermissions.includes('shipment'))"
+            class="nav-item"
+            @mouseenter="toggleSubMenu"
+            :class="{ active: selectedParentMenu == 'sales' }"
+            data-item="sales"
+            :data-submenu="true"
+          >
+            <a class="nav-item-hold" href="#">
+              <i class="nav-icon i-Full-Cart"></i>
+              <span class="nav-text">{{$t('Credits')}}</span>
+            </a>
+            <div class="triangle"></div>
+          </li> -->
 
         
 

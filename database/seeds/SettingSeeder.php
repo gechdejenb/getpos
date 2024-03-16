@@ -16,18 +16,18 @@ class SettingSeeder extends Seeder
         DB::table('settings')->insert(
             array(
                 'id' => 1,
-                'email' => 'admin@example.com',
+                'email' => 'getawdejen@gmail.com',
                 'currency_id' => 1,
                 'client_id' => 1,
                 'sms_gateway' => 1,
                 'is_invoice_footer' => 0,
                 'invoice_footer' => Null,
                 'warehouse_id' => Null,
-                'CompanyName' => 'Stocky',
-                'CompanyPhone' => '6315996770',
-                'CompanyAdress' => '3618 Abia Martin Drive',
-                'footer' => 'Stocky - Ultimate Inventory With POS',
-                'developed_by' => 'Stocky',
+                'CompanyName' => 'Getpos',
+                'CompanyPhone' => '0922756268',
+                'CompanyAdress' => 'Addis Ababa',
+                'footer' => 'GetPos',
+                'developed_by' => 'GetPOS',
                 'logo' => 'logo-default.png',
             )
             

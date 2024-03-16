@@ -16,7 +16,7 @@ class Warehouse extends Seeder
         DB::table('warehouses')->insert(
             array(
                 'id'      => 1,
-                'name'    => 'Default Warehouse',
+                'name'    => 'Arerti Warehouse',
                 'city'    => NULL,
                 'mobile'  => NULL,
                 'zip'     => NULL,

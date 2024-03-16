@@ -17,13 +17,13 @@ class ClientSeeder extends Seeder
         DB::table('clients')->insert(
             array(
                 'id'     => 1,
-                'name'   => 'walk-in-customer',
+                'name'   => 'new-customer',
                 'code' => 1,
-                'email' => 'walk-in-customer@example.com',
-                'country' => 'bangladesh',
-                'city' => 'dhaka',
-                'phone' => '123456780',
-                'adresse' => 'N45 , Dhaka',
+                'email' => 'new-customer@example.com',
+                'country' => 'Ethiopia',
+                'city' => 'Addis Ababa',
+                'phone' => '0902527607',
+                'adresse' => 'Bole Road',
                 'tax_number' => NULL,
             )
             
