@@ -73,6 +73,7 @@ $kernel->terminate($request, $response);
 
 To migrate the database, run the following commands:
 
-
+```bash
 php artisan migrate:fresh
 php artisan db:seed
+```
