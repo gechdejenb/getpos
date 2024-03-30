@@ -298,6 +298,7 @@
                         :options="
                                 [
                                   {label: 'Paid', value: 'paid'},
+                                  {label: 'Credit', value: 'credit'},
                                   {label: 'partial', value: 'partial'},
                                   {label: 'Pending', value: 'pending'},
                                 ]"
@@ -307,7 +308,7 @@
                 </b-col>
 
                 <!-- Payment choice -->
-                <b-col md="4" v-if="payment.status != 'pending'">
+                <b-col md="4" v-if="payment.status != 'pending' || payment.status != 'credit'">
                   <validation-provider name="Payment choice" :rules="{ required: true}">
                     <b-form-group slot-scope="{ valid, errors }" :label="$t('Paymentchoice') + ' ' + '*'">
                       <v-select
@@ -319,8 +320,9 @@
                         :placeholder="$t('PleaseSelect')"
                         :options="
                                   [
+                                                                  {label: 'Credit', value: 'Credit'},
+
                                  {label: 'Cash', value: 'Cash'},
-                            //   {label: 'credit card', value: 'credit card'},
                               {label: 'Tele Birr', value: 'tpe'},
                               {label: 'cheque', value: 'cheque'},
                             //   {label: 'Western Union', value: 'Western Union'},
@@ -342,6 +344,7 @@
                       >
                         <b-form-group :label="$t('Received_Amount') + ' ' + '*'">
                           <b-form-input
+                          :disabled=" payment.status == 'credit'"
                             @keyup="Verified_Received_Amount(payment.received_amount)"
                             label="Received_Amount"
                             :placeholder="$t('Received_Amount')"
@@ -366,7 +369,7 @@
                   >
                     <b-form-group :label="$t('Paying_Amount') + ' ' + '*'">
                       <b-form-input
-                        :disabled="payment.status == 'paid'"
+                        :disabled="payment.status == 'paid' || payment.status == 'credit'"
                         label="Amount"
                         :placeholder="$t('Paying_Amount')"
                         v-model.number="payment.amount"
@@ -617,7 +620,7 @@ export default {
       sales: [],
       payment: {
         status: "pending",
-        Reglement: "Cash",
+        Reglement: "Credit",
         amount: "",
         received_amount: "",
       },

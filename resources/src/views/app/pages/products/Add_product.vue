@@ -395,6 +395,7 @@
 import VueUploadMultipleImage from "vue-upload-multiple-image";
 import VueTagsInput from "@johmun/vue-tags-input";
 import NProgress from "nprogress";
+import IndexedDBHelper from './IndexedDBHelper.js';
 
 export default {
   metaInfo: {
@@ -606,8 +607,34 @@ export default {
   try {
     await axios.post("products", self.data); // Replace "products" with your API endpoint
     // Complete the animation of the progress bar.
+    console.log('new products to be saved new :,',JSON.stringify(this.product));
+    const idbproducts=JSON.stringify(this.product);
     NProgress.done();
     self.SubmitProcessing = false;
+   // Convert the product object to a plain JavaScript object
+const productData = JSON.parse(JSON.stringify(this.product));
+
+// Save the newly created product to IndexedDB
+const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
+console.log('new products to be saved new 2:,',JSON.stringify(this.product));
+
+indexedDBHelper.openDatabase()
+  .then(db => {
+    indexedDBHelper.saveData(productData)
+      .then(() => {
+        console.log('New product saved to IndexedDB');
+      })
+      .catch(error => {
+        console.error('Error saving new product to IndexedDB:', error);
+      });
+  })
+  .catch(error => {
+    console.error('Error opening database for saving new product to IndexedDB:', error);
+  });
+
+
+
+
     this.$router.push({ name: "index_products" }); // Redirect to the appropriate route
     this.makeToast(
       "success",
@@ -644,6 +671,7 @@ export default {
           variants: this.variants,
           images: this.images,
         };
+        console.log('products for offline:;',this.product);
         localStorage.setItem("offlineProductData", JSON.stringify(offlineProductData));
         this.makeToast(
           "info",

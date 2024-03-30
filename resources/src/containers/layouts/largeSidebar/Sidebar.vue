@@ -46,6 +46,56 @@
             <div class="triangle"></div>
           </li>
           <li
+            v-show="currentUserPermissions && (currentUserPermissions.includes('Purchases_view') 
+                        || currentUserPermissions.includes('Purchases_add'))"
+            @mouseenter="toggleSubMenu"
+            class="nav-item"
+            :class="{ active: selectedParentMenu == 'purchases' }"
+            data-item="purchases"
+            :data-submenu="true"
+          >
+            <a class="nav-item-hold" href="#">
+              <i class="nav-icon i-Receipt"></i>
+              <span class="nav-text">{{$t('Purchases')}}</span>
+            </a>
+            <div class="triangle"></div>
+          </li>
+          <li
+            v-show="currentUserPermissions && (currentUserPermissions.includes('Sales_view') 
+                        || currentUserPermissions.includes('Sales_add')
+                        || currentUserPermissions.includes('Pos_view')
+                        || currentUserPermissions.includes('shipment'))"
+            class="nav-item"
+            @mouseenter="toggleSubMenu"
+            :class="{ active: selectedParentMenu == 'sales' }"
+            data-item="sales"
+            :data-submenu="true"
+          >
+            <a class="nav-item-hold" href="#">
+              <i class="nav-icon i-Full-Cart"></i>
+              <span class="nav-text">{{$t('Sales')}}</span>
+            </a>
+            <div class="triangle"></div>
+          </li>
+          <!-- <li
+            v-show="currentUserPermissions && (currentUserPermissions.includes('Sales_view') 
+                        || currentUserPermissions.includes('Sales_add')
+                        || currentUserPermissions.includes('Pos_view')
+                        || currentUserPermissions.includes('shipment'))"
+            class="nav-item"
+            @mouseenter="toggleSubMenu"
+            :class="{ active: selectedParentMenu == 'credit' }"
+            data-item="credit"
+            :data-submenu="true"
+          >
+            <a class="nav-item-hold" href="#">
+              <i class="nav-icon i-Full-Cart"></i>
+              <span class="nav-text">{{$t('Credit Sales')}}</span>
+            </a>
+            <div class="triangle"></div>
+          </li> -->
+
+          <li
             v-show="currentUserPermissions 
               && (currentUserPermissions.includes('adjustment_view')
               || currentUserPermissions.includes('adjustment_add'))"
@@ -97,39 +147,7 @@
             </a>
             <div class="triangle"></div>
           </li>
-          <li
-            v-show="currentUserPermissions && (currentUserPermissions.includes('Purchases_view') 
-                        || currentUserPermissions.includes('Purchases_add'))"
-            @mouseenter="toggleSubMenu"
-            class="nav-item"
-            :class="{ active: selectedParentMenu == 'purchases' }"
-            data-item="purchases"
-            :data-submenu="true"
-          >
-            <a class="nav-item-hold" href="#">
-              <i class="nav-icon i-Receipt"></i>
-              <span class="nav-text">{{$t('Purchases')}}</span>
-            </a>
-            <div class="triangle"></div>
-          </li>
-          <li
-            v-show="currentUserPermissions && (currentUserPermissions.includes('Sales_view') 
-                        || currentUserPermissions.includes('Sales_add')
-                        || currentUserPermissions.includes('Pos_view')
-                        || currentUserPermissions.includes('shipment'))"
-            class="nav-item"
-            @mouseenter="toggleSubMenu"
-            :class="{ active: selectedParentMenu == 'sales' }"
-            data-item="sales"
-            :data-submenu="true"
-          >
-            <a class="nav-item-hold" href="#">
-              <i class="nav-icon i-Full-Cart"></i>
-              <span class="nav-text">{{$t('Sales')}}</span>
-            </a>
-            <div class="triangle"></div>
-          </li>
-
+          
             <li
             v-if="currentUserPermissions && currentUserPermissions.includes('Sale_Returns_view')"
             @mouseenter="toggleSubMenu"
@@ -543,8 +561,49 @@
             </router-link>
           </li>
         </ul>
-
-      
+        <!-- Credits  -->
+        <ul
+          class="childNav d-none"
+          data-parent="credit"
+          :class="{ 'd-block': selectedParentMenu == 'credit' }"
+        >
+          <li
+            class="nav-item"
+            v-if="currentUserPermissions && currentUserPermissions.includes('Sales_add')"
+          >
+            <router-link tag="a" class to="/app/sales/store">
+              <i class="nav-icon i-Add-File"></i>
+              <span class="item-name">{{$t('AddSale')}}</span>
+            </router-link>
+          </li>
+          <li
+            class="nav-item"
+            v-if="currentUserPermissions && currentUserPermissions.includes('Sales_view')"
+          >
+            <router-link tag="a" class to="/app/sales/list">
+              <i class="nav-icon i-Files"></i>
+              <span class="item-name">{{$t('ListSales')}}</span>
+            </router-link>
+          </li>
+          <li
+            class="nav-item"
+            v-if="currentUserPermissions && currentUserPermissions.includes('Pos_view')"
+          >
+            <router-link tag="a" class to="/app/pos">
+              <i class="nav-icon i-Files"></i>
+              <span class="item-name">POS</span>
+            </router-link>
+          </li>
+          <li
+            class="nav-item"
+            v-if="currentUserPermissions && currentUserPermissions.includes('shipment')"
+          >
+            <router-link tag="a" class to="/app/sales/shipment">
+              <i class="nav-icon i-Files"></i>
+              <span class="item-name">{{$t('Shipments')}}</span>
+            </router-link>
+          </li>
+        </ul>
 
        
       <!-- hrm -->

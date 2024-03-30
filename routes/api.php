@@ -281,6 +281,17 @@ Route::middleware(['auth:api', 'Is_Active'])->group(function () {
 
     Route::resource('shipments', 'ShipmentController');
 
+    //-------------------------------Credit  Sales --------------------------\\
+    //------------------------------------------------------------------\\
+
+    Route::resource('sales', 'CreditController');
+    Route::get('convert_to_sale_data/{id}', 'CreditController@Elemens_Change_To_Sale');
+    Route::get('get_payments_by_sale/{id}', 'CreditController@Payments_Sale');
+    Route::post('sales_send_email', 'CreditController@Send_Email');
+    Route::post('sales_send_sms', 'CreditController@Send_SMS');
+    Route::post('sales_delete_by_selection', 'CreditController@delete_by_selection');
+    Route::get('get_Products_by_sale/{id}', 'CreditController@get_Products_by_sale');
+
 
     //------------------------------- Payments  Sales --------------------------\\
     //------------------------------------------------------------------\\

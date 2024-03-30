@@ -904,19 +904,21 @@
                         :rules="{ required: true , regex: /^\d*\.?\d*$/}"
                         v-slot="validationContext"
                       >
-                        <b-form-group :label="$t('Received_Amount') + ' ' + '*'">
-                          <b-form-input
-                            @keyup="Verified_Received_Amount(payment.received_amount)"
-                            label="Received_Amount"
-                            :placeholder="$t('Received_Amount')"
-                            v-model.number="payment.received_amount"
-                            :state="getValidationState(validationContext)"
-                            aria-describedby="Received_Amount-feedback"
-                          ></b-form-input>
-                          <b-form-invalid-feedback
-                            id="Received_Amount-feedback"
-                          >{{ validationContext.errors[0] }}</b-form-invalid-feedback>
-                        </b-form-group>
+                      <b-form-group :label="$t('Received_Amount') + ' ' + '*'">
+                        <b-form-input
+                          :disabled="payment.Reglement === 'credit'"
+                          @keyup="Verified_Received_Amount(payment.received_amount)"
+                          label="Received_Amount"
+                          :placeholder="$t('Received_Amount')"
+                          v-model.number="payment.received_amount"
+                          :state="getValidationState(validationContext)"
+                          aria-describedby="Received_Amount-feedback"
+                        ></b-form-input>
+                        <b-form-invalid-feedback
+                          id="Received_Amount-feedback"
+                        >{{ validationContext.errors[0] }}</b-form-invalid-feedback>
+                      </b-form-group>
+
                       </validation-provider>
                     </b-col>
 
@@ -929,6 +931,7 @@
                       >
                         <b-form-group :label="$t('Paying_Amount') + ' ' + '*'">
                           <b-form-input
+                          :disabled=" payment.Reglement == 'credit'"
                             label="Paying_Amount"
                             @keyup="Verified_paidAmount(payment.amount)"
                             :placeholder="$t('Paying_Amount')"
@@ -964,11 +967,12 @@
                             :placeholder="$t('PleaseSelect')"
                             :options="
                               [
+                              {label: 'credit', value: 'credit'},
+
                               {label: 'Cash', value: 'Cash'},
-                            //   {label: 'credit card', value: 'credit card'},
                               {label: 'Tele Birr', value: 'tpe'},
                               {label: 'cheque', value: 'cheque'},
-                            //   {label: 'Western Union', value: 'Western Union'},
+                              // {label: 'Western Union', value: 'Western Union'},
                               {label: 'bank transfer', value: 'bank transfer'},
                               {label: 'other', value: 'other'},
                               ]"
@@ -1336,6 +1340,7 @@ export default {
     brand_totalRows() {
       return this.brands.length;
     },
+    
     category_totalRows() {
       return this.categories.length;
     }
@@ -2089,7 +2094,13 @@ export default {
           );
           this.payment.amount = 0;
         }
+        else if (this.payment.Reglement=='credit') {
+          
+          this.payment.amount = 0;
+          this.payment.received_amount=0;
+        }
       }
+      
     },
     //---------- keyup Received Amount
     Verified_Received_Amount() {

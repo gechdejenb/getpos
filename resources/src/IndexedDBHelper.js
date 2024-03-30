@@ -1,18 +1,20 @@
 class IndexedDBHelper {
-    constructor(dbName, storeName) {
+    constructor(dbName, version, storeName) {
         this.dbName = dbName;
+        this.version = version;
         this.storeName = storeName;
         this.db = null;
     }
 
     async openDatabase() {
         return new Promise((resolve, reject) => {
-            const request = indexedDB.open(this.dbName, 1);
+            const request = indexedDB.open(this.dbName, this.version);
 
             request.onupgradeneeded = (event) => {
                 this.db = event.target.result;
                 this.db.createObjectStore(this.storeName, {
-                    keyPath: 'id'
+                    keyPath: 'id',
+                    autoIncrement: true
                 });
             };
 
@@ -27,18 +29,25 @@ class IndexedDBHelper {
         });
     }
 
-    async saveProducts(products) {
-        const transaction = this.db.transaction([this.storeName], 'readwrite');
-        const objectStore = transaction.objectStore(this.storeName);
-
-        products.forEach((product) => {
-            objectStore.put(product);
-        });
-
-        await transaction.complete;
+    async saveData(productData) {
+        try {
+            let db = await this.openDatabase();
+            return new Promise(resolve => {
+                let trans = db.transaction(['products'], 'readwrite');
+                trans.oncomplete = () => {
+                    resolve();
+                };
+                let store = trans.objectStore('products');
+                store.put(productData);
+            });
+        } catch (error) {
+            throw new Error('Error saving data to IndexedDB: ' + error.message);
+        }
     }
+    
+    
 
-    async getProducts() {
+    async getData() {
         const transaction = this.db.transaction([this.storeName], 'readonly');
         const objectStore = transaction.objectStore(this.storeName);
         const products = [];

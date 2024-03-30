@@ -442,7 +442,7 @@ export default {
           var dark_heading = "#c2c6dc";
 
           this.echartCustomer = {
-            color: ["#6D28D9", "#8B5CF6", "#A78BFA", "#C4B5FD", "#7C3AED"],
+            color: ["#5E8C83", "#6D9A90", "#7DA69D", "#8CB4AA", "#9CC1B7"],
             tooltip: {
               show: true,
               backgroundColor: "rgba(0, 0, 0, .8)"
@@ -512,7 +512,7 @@ export default {
             ]
           };
           this.echartProduct = {
-            color: ["#6D28D9", "#8B5CF6", "#A78BFA", "#C4B5FD", "#7C3AED"],
+            color: ["#5E8C83", "#6D9A90", "#7DA69D", "#8CB4AA", "#9CC1B7"],          
             tooltip: {
               show: true,
               backgroundColor: "rgba(0, 0, 0, .8)"
@@ -612,7 +612,7 @@ export default {
                 data: responseData.sales.original.data,
                 label: { show: false, color: "#8B5CF6" },
                 type: "bar",
-                color: "#A78BFA",
+                color: "#5E8C83",
                 smooth: true,
                 itemStyle: {
                   emphasis: {
@@ -630,7 +630,7 @@ export default {
                 label: { show: false, color: "#0168c1" },
                 type: "bar",
                 barGap: 0,
-                color: "#DDD6FE",
+                color: "#A4D4BB",
                 smooth: true,
                 itemStyle: {
                   emphasis: {

@@ -1,9 +1,25 @@
-const cacheName = 'offline';
+const cacheName = 'your-cache-name';
 
 const filesToCache = [
   '/',
   '/app/dashboard/',
-  '/app/products/',
+  '/app/products/list',
+  '/app/purchases/list',
+  '/app/sales/list',
+  '/app/products/store',
+  '/app/purchases/store',
+  '/app/sales/store',
+  '/app/adjustments/list',
+  '/app/adjustments/store',
+  '/app/quotations/list',
+  '/app/quotations/store',
+  '/app/sale_return/list',
+  '/app/sale_return/list',
+  '/app/transfers/list',
+  '/app/transfers/store',
+  '/app/reports/customers_report',
+  '/app/reports/detail_customer/2',
+  '/app/pos',
   '/offline.html'
 ];
 
@@ -15,22 +31,6 @@ async function preLoad() {
 self.addEventListener('install', function (event) {
   event.waitUntil(preLoad());
 });
-
-async function checkResponse(request) {
-  try {
-    const response = await fetch(request);
-    if (response && response.status !== 404) {
-      const cache = await caches.open(cacheName);
-      await cache.put(request, response.clone());
-      return response;
-    }
-  } catch (error) {
-    console.error('Error fetching from network:', error);
-  }
-  return caches.match(request).then(function (cachedResponse) {
-    return cachedResponse || caches.match('offline.html');
-  });
-}
 
 async function loadDataFromIndexedDBProducts() {
   const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
@@ -56,17 +56,25 @@ self.addEventListener('fetch', function (event) {
   if (requestUrl.pathname === '/app/products/list' && !navigator.onLine) {
     event.respondWith(loadDataFromIndexedDBProducts());
   } else {
-    // Rest of your code for caching and responding with cached data
-    event.respondWith(checkResponse(event.request).catch(function () {
-      return returnFromCache(event.request);
-    }));
-
-    if (!event.request.url.startsWith('http')) {
-      event.waitUntil(addToCache(event.request));
-    }
+    event.respondWith(checkResponse(event.request));
   }
 });
 
+async function checkResponse(request) {
+  try {
+    const response = await fetch(request);
+    if (response && response.status !== 404 && request.method === 'GET') {
+      const cache = await caches.open(cacheName);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    console.error('Error fetching from network:', error);
+    return caches.match(request).then(function (cachedResponse) {
+      return cachedResponse || caches.match('offline.html');
+    });
+  }
+}
 
 self.addEventListener('activate', function (event) {
   console.log('Service Worker Activated');

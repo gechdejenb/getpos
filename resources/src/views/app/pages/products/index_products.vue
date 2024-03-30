@@ -726,6 +726,25 @@ export default {
           // Start the progress bar.
           NProgress.start();
           NProgress.set(0.1);
+            // Delete the product from IndexedDB
+          const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
+          indexedDBHelper.openDatabase()
+            .then(db => {
+              const transaction = db.transaction('products', 'readwrite');
+              const objectStore = transaction.objectStore('products');
+              const deleteRequest = objectStore.delete(id);
+              deleteRequest.onsuccess = () => {
+                console.log('Product deleted from IndexedDB');
+              };
+              deleteRequest.onerror = (event) => {
+                console.error('Error deleting product from IndexedDB:', event.target.error);
+              };
+            })
+            .catch(error => {
+              console.error('Error opening database for deleting product:', error);
+            });
+
+          // start deleting from server 
           axios
             .delete("products/" + id)
             .then(() => {
@@ -766,6 +785,23 @@ export default {
           // Start the progress bar.
           NProgress.start();
           NProgress.set(0.1);
+          // Delete selected products from IndexedDB
+      const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
+      indexedDBHelper.openDatabase()
+        .then(db => {
+          const transaction = db.transaction('products', 'readwrite');
+          const objectStore = transaction.objectStore('products');
+          for (const id of this.selectedIds) {
+            objectStore.delete(id);
+          }
+          console.log('Selected products deleted from IndexedDB');
+        })
+        .catch(error => {
+          console.error('Error opening database for deleting selected products:', error);
+        });
+
+
+          // start removing from server 
           axios
             .post("products/delete/by_selection", {
               selectedIds: this.selectedIds
