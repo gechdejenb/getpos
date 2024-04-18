@@ -52,11 +52,11 @@ $full-map: (
       background-color: $value;
     }
     .text-#{$colorName}-#{$name} {
-        @if (lightness( $value ) > 40) {
+        @if (lightness($value) > 40) {
           color: black;
         }
         @else {
-          color: white;
+          color: "white"; 
         }
     }
   }

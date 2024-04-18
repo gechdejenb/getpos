@@ -574,84 +574,45 @@ export default {
     },
 
     //------------------------------ Create new Product ------------------------------\\
-   async Create_Product() {
+   // In your Create_Product method
+async Create_Product() {
   NProgress.start();
-  NProgress.set(0.1);
-  var self = this;
-  self.SubmitProcessing = true;
+  this.SubmitProcessing = true;
 
-  if (self.product.is_variant && self.variants.length <= 0) {
-    self.product.is_variant = false;
-  }
-  // append object product
-  Object.entries(self.product).forEach(([key, value]) => {
-    self.data.append(key, value);
+  // Append product fields to FormData for submitting to a server
+  let formData = new FormData();
+  Object.keys(this.product).forEach(key => {
+    formData.append(key, this.product[key]);
   });
 
-  // append array variants
-  if (self.variants.length) {
-    for (var i = 0; i < self.variants.length; i++) {
-      self.data.append("variants[" + i + "]", self.variants[i].text);
-    }
-  }
-  // append array images
-  if (self.images.length > 0) {
-    for (var k = 0; k < self.images.length; k++) {
-      Object.entries(self.images[k]).forEach(([key, value]) => {
-        self.data.append("images[" + k + "][" + key + "]", value);
-      });
-    }
-  }
+  const idbHelper = new IndexedDBHelper('myDatabase', 1, 'products');
 
-  // Send Data with axios
   try {
-    await axios.post("products", self.data); // Replace "products" with your API endpoint
-    // Complete the animation of the progress bar.
-    console.log('new products to be saved new :,',JSON.stringify(this.product));
-    const idbproducts=JSON.stringify(this.product);
-    NProgress.done();
-    self.SubmitProcessing = false;
-   // Convert the product object to a plain JavaScript object
-const productData = JSON.parse(JSON.stringify(this.product));
-
-// Save the newly created product to IndexedDB
-const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
-console.log('new products to be saved new 2:,',JSON.stringify(this.product));
-
-indexedDBHelper.openDatabase()
-  .then(db => {
-    indexedDBHelper.saveData(productData)
-      .then(() => {
-        console.log('New product saved to IndexedDB');
-      })
-      .catch(error => {
-        console.error('Error saving new product to IndexedDB:', error);
-      });
-  })
-  .catch(error => {
-    console.error('Error opening database for saving new product to IndexedDB:', error);
-  });
-
-
-
-
-    this.$router.push({ name: "index_products" }); // Redirect to the appropriate route
-    this.makeToast(
-      "success",
-      this.$t("Successfully_Created"),
-      this.$t("Success")
-    );
+    await idbHelper.openDatabase();
+    await idbHelper.saveData(this.product);
+    this.makeToast("success", "Successfully Created", "Success");
+    this.$router.push({ name: "index_products" });
   } catch (error) {
-    // Complete the animation of the progress bar.
+    console.error("Error saving to IndexedDB", error);
+    this.makeToast("error", "Save Local Failed", "Failed");
+  } finally {
     NProgress.done();
-    if (error.response && error.response.data.errors && error.response.data.errors.code) {
-      self.code_exist = error.response.data.errors.code[0];
-    }
-    this.makeToast("danger", this.$t("InvalidData"), this.$t("Failed"));
-    self.SubmitProcessing = false;
+    this.SubmitProcessing = false;
   }
 },
-
+async openIndexedDB() {
+  if (!('indexedDB' in window)) {
+    throw new Error("This browser doesn't support IndexedDB");
+  }
+  return await idb.openDB('myDatabase', 1, {
+    upgrade(db) {
+      if (!db.objectStoreNames.contains('products')) {
+        db.createObjectStore('products', { keyPath: 'id', autoIncrement: true });
+      }
+    }
+  });
+}
+,
   async Submit_Product() {
   this.$refs.Create_Product.validate().then(success => {
     if (!success) {

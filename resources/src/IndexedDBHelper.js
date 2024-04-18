@@ -31,6 +31,7 @@ class IndexedDBHelper {
 
     async saveData(productData) {
         try {
+            
             let db = await this.openDatabase();
             return new Promise(resolve => {
                 let trans = db.transaction(['products'], 'readwrite');
