@@ -585,11 +585,9 @@ async Create_Product() {
     formData.append(key, this.product[key]);
   });
 
-  const idbHelper = new IndexedDBHelper('myDatabase', 1, 'products');
-
+  const idbHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
   try {
-    await idbHelper.openDatabase();
-    await idbHelper.saveData(this.product);
+    await indexedDBHelper.saveData(product);
     this.makeToast("success", "Successfully Created", "Success");
     this.$router.push({ name: "index_products" });
   } catch (error) {
@@ -604,7 +602,7 @@ async openIndexedDB() {
   if (!('indexedDB' in window)) {
     throw new Error("This browser doesn't support IndexedDB");
   }
-  return await idb.openDB('myDatabase', 1, {
+  return await idb.openDB('ProductsDBs', 1, {
     upgrade(db) {
       if (!db.objectStoreNames.contains('products')) {
         db.createObjectStore('products', { keyPath: 'id', autoIncrement: true });

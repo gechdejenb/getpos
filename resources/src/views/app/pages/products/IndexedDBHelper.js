@@ -1,59 +1,69 @@
-import { openDB } from 'idb';
-
 class IndexedDBHelper {
-    constructor(dbName, dbVersion, storeName) {
+    static dbInstance = null; // Singleton instance
+
+    constructor(dbName, version, storeName) {
+        if (IndexedDBHelper.dbInstance) {
+            return IndexedDBHelper.dbInstance; // Return the existing instance if already created
+        }
         this.dbName = dbName;
-        this.dbVersion = dbVersion;
+        this.version = version;
         this.storeName = storeName;
-        this.dbPromise = openDB(this.dbName, this.dbVersion, {
-            upgrade: (db, oldVersion, newVersion, transaction) => {
-                if (!db.objectStoreNames.contains(this.storeName)) {
-                    db.createObjectStore(this.storeName, { keyPath: 'id', autoIncrement: true });
-                }
-            }
-        });
+        IndexedDBHelper.dbInstance = this;
     }
 
     async openDatabase() {
-        return this.dbPromise;
+        if (this.db) {
+            return this.db; // Return the existing DB connection if already open
+        }
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName, this.version);
+
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(this.storeName)) {
+                    db.createObjectStore(this.storeName, { keyPath: 'id', autoIncrement: true });
+                }
+            };
+
+            request.onsuccess = (event) => {
+                this.db = event.target.result;
+                resolve(this.db);
+            };
+
+            request.onerror = (event) => {
+                console.error("IndexedDB error:", event.target.error);
+                reject(event.target.error);
+            };
+        });
     }
 
     async saveData(productData) {
-        try {
-            if (!Array.isArray(productData)) {
-                productData = [productData];  // Ensure productData is an array
-            }
+        await this.openDatabase(); // Ensure the database is open
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readwrite');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.put(productData); // Use put to add or update
 
-            let db = await this.openDatabase();
-            let tx = db.transaction(this.storeName, 'readwrite');
-            let store = tx.objectStore(this.storeName);
-            console.log('product product data: .',productData)
-
-
-            productData.forEach(data => {
-                console.log('product data: .',data)
-                store.add(data);
-            });
-
-            await tx.complete;
-            console.log('Product data saved successfully');
-        } catch (error) {
-            console.error('Error saving data to IndexedDB:', error);
-            throw new Error('Error saving data to IndexedDB: ' + error.message);
-        }
+            request.onsuccess = () => resolve();
+            request.onerror = (event) => {
+                console.error("Save data error:", event.target.error);
+                reject(event.target.error);
+            };
+        });
     }
 
     async getData() {
-        try {
-            const db = await this.openDatabase();
-            const tx = db.transaction(this.storeName, 'readonly');
-            const store = tx.objectStore(this.storeName);
-            return store.getAll();
-        } catch (error) {
-            console.error('Error getting data from IndexedDB:', error);
-            throw error;
-        }
+        await this.openDatabase(); // Ensure the database is open
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readonly');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.getAll(); // Simpler than using a cursor for this case
+
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = (event) => {
+                console.error("Get data error:", event.target.error);
+                reject(event.target.error);
+            };
+        });
     }
 }
-
-export default IndexedDBHelper;
