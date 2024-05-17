@@ -597,44 +597,62 @@ export default {
       // Do something with the products loaded from IndexedDB
     },
 
-
     async Get_Products(page) {
+  // Start the progress bar
   NProgress.start();
-  // Using the constants for database information
-  const indexedDBHelper = new IndexedDBHelper(DB_NAME, DB_VERSION, STORE_NAME);
+  NProgress.set(0.1);
+
+  const dbName = 'ProductsDBs';
+  const storeName = 'products';
+  const indexedDBHelper = new IndexedDBHelper(dbName, 1, storeName);
+  await indexedDBHelper.openDatabase();
 
   const isOnline = navigator.onLine;
+
   if (isOnline) {
     this.setToStrings();
     try {
       const response = await axios.get(`products?page=${page}&code=${this.Filter_code}&name=${this.Filter_name}&category_id=${this.Filter_category}&brand_id=${this.Filter_brand}&SortField=${this.serverParams.sort.field}&SortType=${this.serverParams.sort.type}&search=${this.search}&limit=${this.limit}`);
       const products = response.data.products;
+
       this.warehouses = response.data.warehouses;
       this.categories = response.data.categories;
       this.brands = response.data.brands;
       this.totalRows = response.data.totalRows;
 
       // Save fetched products to IndexedDB
-      for (let product of products) {
-        await indexedDBHelper.saveData(product);
-      }
-
+      await indexedDBHelper.saveData(products);
       console.log('Products saved to IndexedDB');
+
+      // Retrieve products from IndexedDB to ensure they are correctly saved
+      this.products = await indexedDBHelper.getData();
+      console.log('Retrieved products:', this.products);
+
+      // Complete the animation of the progress bar
+      NProgress.done();
+      this.isLoading = false;
     } catch (error) {
       console.error('Error fetching or saving products:', error);
+      NProgress.done();
+      this.isLoading = false;
     }
   } else {
-    // Handle offline logic to fetch products from IndexedDB
     try {
+      // Fetch products from IndexedDB when offline
       this.products = await indexedDBHelper.getData();
-      console.log('Products fetched from IndexedDB');
+      console.log('Products fetched from IndexedDB:', this.products);
+
+      // Complete the animation of the progress bar
+      NProgress.done();
+      this.isLoading = false;
     } catch (error) {
       console.error('Error fetching products from IndexedDB:', error);
+      NProgress.done();
+      this.isLoading = false;
     }
   }
-
-  NProgress.done();
 }
+
 ,
 
     //----------------------------------- Remove Product ------------------------------\\
