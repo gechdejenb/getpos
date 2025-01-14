@@ -6,6 +6,7 @@ const {
 
 mix.js('resources/src/main.js', 'public')
   .js('resources/src/login.js', 'public')
+  .js('resources/src/IndexedDBHelper.js','public')
   .vue();
 
 // Replace the existing mix.webpackConfig block with this updated block

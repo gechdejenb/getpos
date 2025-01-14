@@ -304,7 +304,8 @@ import { mapActions, mapGetters } from "vuex";
 import NProgress from "nprogress";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import IndexedDBHelper from './IndexedDBHelper.js';
+import IndexedDBHelper from './../../../../IndexedDBHelper.js';
+
 // Define your upgrade callback function
 function upgradeDB(db, oldVersion, newVersion, transaction) {
     // Handle upgrades here if needed
@@ -317,6 +318,7 @@ export default {
 
   data() {
     return {
+      idbHelper: new IndexedDBHelper('ProductsDBs', 2),
       serverParams: {
         sort: {
           field: "id",
@@ -341,7 +343,9 @@ export default {
       categories: [],
       brands: [],
       products: {},
-      warehouses: []
+      warehouses: [],
+      statuses:'on' 
+
     };
   },
 
@@ -585,74 +589,182 @@ export default {
 
     // -------------------------------For offline use ..............\\
     async saveProductsToIndexedDB(products) {
-      const indexedDBHelper = new IndexedDBHelper('ProductDB', 'products');
+      const indexedDBHelper = new IndexedDBHelper('ProductDB',2, 'products');
       await indexedDBHelper.openDatabase();
       await indexedDBHelper.saveProducts(products);
     },
 
     async loadProductsFromIndexedDB() {
-      const indexedDBHelper = new IndexedDBHelper('ProductDB', 'products');
+      const indexedDBHelper = new IndexedDBHelper('ProductDB',2, 'products');
       await indexedDBHelper.openDatabase();
       const products = await indexedDBHelper.getProducts();
       // Do something with the products loaded from IndexedDB
     },
 
-    async Get_Products(page) {
-  // Start the progress bar
+//     async Get_Products(page) {
+//   // Start the progress bar
+//   NProgress.start();
+//   NProgress.set(0.1);
+
+//   const dbName = 'ProductsDBs';
+//   const storeName = 'products';
+//   const indexedDBHelper = new IndexedDBHelper(dbName, 1, storeName);
+//   await indexedDBHelper.openDatabase();
+
+//   const isOnline = navigator.onLine;
+
+//   if (isOnline) {
+//     this.setToStrings();
+//     try {
+//       const response = await axios.get(`products?page=${page}&code=${this.Filter_code}&name=${this.Filter_name}&category_id=${this.Filter_category}&brand_id=${this.Filter_brand}&SortField=${this.serverParams.sort.field}&SortType=${this.serverParams.sort.type}&search=${this.search}&limit=${this.limit}`);
+//       const products = response.data.products;
+
+//       this.warehouses = response.data.warehouses;
+//       this.categories = response.data.categories;
+//       this.brands = response.data.brands;
+//       this.totalRows = response.data.totalRows;
+
+//       // Save fetched products to IndexedDB
+//       await indexedDBHelper.saveData(products);
+//       console.log('Products saved to IndexedDB');
+
+//       // Retrieve products from IndexedDB to ensure they are correctly saved
+//       this.products = await indexedDBHelper.getData();
+//       console.log('Retrieved products:', this.products);
+
+//       // Complete the animation of the progress bar
+//       NProgress.done();
+//       this.isLoading = false;
+//     } catch (error) {
+//       console.error('Error fetching or saving products:', error);
+//       NProgress.done();
+//       this.isLoading = false;
+//     }
+//   } else {
+//     try {
+//       // Fetch products from IndexedDB when offline
+//       this.products = await indexedDBHelper.getData();
+//       console.log('Products fetched from IndexedDB:', this.products);
+
+//       // Complete the animation of the progress bar
+//       NProgress.done();
+//       this.isLoading = false;
+//     } catch (error) {
+//       console.error('Error fetching products from IndexedDB:', error);
+//       NProgress.done();
+//       this.isLoading = false;
+//     }
+//   }
+// }
+// async Get_Products(page) {
+//   // Start the progress bar.
+//   NProgress.start();
+//   NProgress.set(0.1);
+
+//   const dbName = 'ProductsDBs';
+//   const storeName = 'products';
+//   const indexedDBHelper = new IndexedDBHelper(dbName, 1, storeName);
+//   await indexedDBHelper.openDatabase();
+
+//   const isOnline = navigator.onLine;
+
+//   if (isOnline) {
+//     this.setToStrings();
+//     try {
+//       const response = await axios.get(`products?page=${page}&code=${this.Filter_code}&name=${this.Filter_name}&category_id=${this.Filter_category}&brand_id=${this.Filter_brand}&SortField=${this.serverParams.sort.field}&SortType=${this.serverParams.sort.type}&search=${this.search}&limit=${this.limit}`);
+//       const products = response.data.products;
+
+//       this.warehouses = response.data.warehouses;
+//       this.categories = response.data.categories;
+//       this.brands = response.data.brands;
+//       this.totalRows = response.data.totalRows;
+
+//       // Save fetched products to IndexedDB
+//       await indexedDBHelper.saveData(products);
+//       console.log('Products saved to IndexedDB');
+
+//       // Retrieve products from IndexedDB to ensure they are correctly saved
+//       this.products = await indexedDBHelper.getData();
+//       console.log('Retrieved products:', this.products);
+
+//       // Complete the animation of the progress bar
+//       NProgress.done();
+//       this.isLoading = false;
+//     } catch (error) {
+//       console.error('Error fetching or saving products:', error);
+//       NProgress.done();
+//       this.isLoading = false;
+//     }
+//   } else {
+//     try {
+//       // Fetch products from IndexedDB when offline
+//       this.products = await indexedDBHelper.getData();
+//       console.log('Products fetched from IndexedDB:', this.products);
+
+//       // Complete the animation of the progress bar
+//       NProgress.done();
+//       this.isLoading = false;
+//     } catch (error) {
+//       console.error('Error fetching products from IndexedDB:', error);
+//       NProgress.done();
+//       this.isLoading = false;
+//     }
+//   }
+// }
+async Get_Products(page) {
+  // Start the progress bar.
   NProgress.start();
   NProgress.set(0.1);
 
   const dbName = 'ProductsDBs';
   const storeName = 'products';
-  const indexedDBHelper = new IndexedDBHelper(dbName, 1, storeName);
-  await indexedDBHelper.openDatabase();
+  const indexedDBHelper = new IndexedDBHelper(dbName, 2); // Ensure the version is correct
 
-  const isOnline = navigator.onLine;
+  try {
+    // Check if online or offline
+    const isOnline = navigator.onLine;
 
-  if (isOnline) {
-    this.setToStrings();
-    try {
+    if (isOnline && this.statuses === 'on') {
+      // Fetch data from the server
       const response = await axios.get(`products?page=${page}&code=${this.Filter_code}&name=${this.Filter_name}&category_id=${this.Filter_category}&brand_id=${this.Filter_brand}&SortField=${this.serverParams.sort.field}&SortType=${this.serverParams.sort.type}&search=${this.search}&limit=${this.limit}`);
       const products = response.data.products;
 
-      this.warehouses = response.data.warehouses;
-      this.categories = response.data.categories;
-      this.brands = response.data.brands;
-      this.totalRows = response.data.totalRows;
-
       // Save fetched products to IndexedDB
-      await indexedDBHelper.saveData(products);
+      await indexedDBHelper.saveData(storeName, products);
       console.log('Products saved to IndexedDB');
 
-      // Retrieve products from IndexedDB to ensure they are correctly saved
-      this.products = await indexedDBHelper.getData();
-      console.log('Retrieved products:', this.products);
-
-      // Complete the animation of the progress bar
-      NProgress.done();
-      this.isLoading = false;
-    } catch (error) {
-      console.error('Error fetching or saving products:', error);
-      NProgress.done();
-      this.isLoading = false;
-    }
-  } else {
-    try {
-      // Fetch products from IndexedDB when offline
-      this.products = await indexedDBHelper.getData();
+      // Update component state with fetched products
+      this.products = products;
+      this.totalRows = response.data.totalRows;
+    } else if (isOnline && this.statuses === 'off') {
+      // Offline: Fetch products from IndexedDB
+      this.products = await indexedDBHelper.getData(storeName);
       console.log('Products fetched from IndexedDB:', this.products);
-
-      // Complete the animation of the progress bar
-      NProgress.done();
-      this.isLoading = false;
-    } catch (error) {
-      console.error('Error fetching products from IndexedDB:', error);
-      NProgress.done();
-      this.isLoading = false;
+      this.totalRows = this.products.length; // Update totalRows based on the fetched data
     }
+    else if (!isOnline || this.statuses === 'off') {
+      // Offline: Fetch products from IndexedDB
+      this.products = await indexedDBHelper.getData(storeName);
+      console.log('Products fetched from IndexedDB:', this.products);
+      this.totalRows = this.products.length; // Update totalRows based on the fetched data
+    }
+
+    // Complete the animation of the progress bar
+    NProgress.done();
+    this.isLoading = false;
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    // Attempt to fetch from IndexedDB if there's an error (e.g., network issues)
+    if (!isOnline ) {
+      this.products = await indexedDBHelper.getData(storeName);
+      console.log('Products fetched from IndexedDB due to error:', this.products);
+      this.totalRows = this.products.length; // Update totalRows based on the fetched data
+    }
+    
+    NProgress.done();
+    this.isLoading = false;
   }
 }
-
 ,
 
     //----------------------------------- Remove Product ------------------------------\\
@@ -672,7 +784,7 @@ export default {
           NProgress.start();
           NProgress.set(0.1);
             // Delete the product from IndexedDB
-          const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
+          const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 2, 'products');
           indexedDBHelper.openDatabase()
             .then(db => {
               const transaction = db.transaction('products', 'readwrite');
@@ -731,7 +843,7 @@ export default {
           NProgress.start();
           NProgress.set(0.1);
           // Delete selected products from IndexedDB
-      const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
+      const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 2, 'products');
       indexedDBHelper.openDatabase()
         .then(db => {
           const transaction = db.transaction('products', 'readwrite');
@@ -792,6 +904,26 @@ export default {
       }, 500);
     });
   },
+  async mounted() {
+    window.addEventListener("online", this.syncDataWhenOnline);
+    const indexedDbStatus = new IndexedDBHelper('ProductsDBs', 2);
+
+    try {
+        const dataStatus = await indexedDbStatus.getData('status');
+
+        // Assuming dataStatus is an array based on your initial code
+        if (Array.isArray(dataStatus) && dataStatus.length > 0) {
+            this.statuses = dataStatus[0].status; // Access status from the first object
+        } else {
+            this.statuses = 'off'; // Default to 'off' if no data
+        }
+    } catch (error) {
+        console.error('Error fetching status from IndexedDB:', error);
+        this.statuses = 'off'; // Set to a default value on error
+    }
+
+    console.log('Current Status:', this.statuses);
+}
   
 };
 </script>

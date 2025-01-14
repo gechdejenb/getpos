@@ -27,6 +27,13 @@
       <!-- Full screen toggle -->
       <i class="i-Full-Screen header-icon d-none d-sm-inline-block" @click="handleFullScreen"></i>
       <!-- Grid menu Dropdown -->
+      <!-- Status toggle -->
+      <div class="card-body">
+        <label class="switch switch-primary mr-3 mt-2" v-b-popover.hover.left="popoverMessage">
+          <input type="checkbox" :checked="status === 'on'" @change="toggleStatus" />
+          <span class="slider"></span>
+        </label>
+      </div>
 
       <div class="dropdown">
         <b-dropdown
@@ -144,7 +151,9 @@ import { mapGetters, mapActions } from "vuex";
 import { mixin as clickaway } from "vue-clickaway";
 // import { setTimeout } from 'timers';
 import FlagIcon from "vue-flag-icon";
-import Calculator from "./Calculator.vue"
+import Calculator from "./Calculator.vue";
+import IndexedDBHelper from './../../../IndexedDBHelper.js';
+
 export default {
   mixins: [clickaway],
   components: {
@@ -174,7 +183,7 @@ export default {
         "ba",
         "br",
       ],
-
+      status: 'on',
       isDisplay: true,
       isStyle: true,
       isSearchOpen: false,
@@ -193,6 +202,9 @@ export default {
       "currentUserPermissions",
       "notifs_alert",
     ]),
+    popoverMessage() {
+      return this.status === 'on' ? 'Online Mode' : 'Offline Mode';
+    },
 
 
   },
@@ -205,7 +217,23 @@ export default {
       "changeThemeMode",
       "logout",
     ]),
+//     async toggleStatus(event) {
+//   // Update status based on the checkbox
+//   const newStatus = event.target.checked ? 'on' : 'off';
+//   this.status = newStatus;
 
+//   // Save the new status to IndexedDB
+//   const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 2); // Use the updated version
+//   const data = { id: 1, status: newStatus }; // Ensure the data has an id
+//   await indexedDBHelper.saveData('status', data);
+// }
+async toggleStatus(event) {
+  const newStatus = event.target.checked ? 'on' : 'off';
+  this.status = newStatus;
+  
+  const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 2);
+  await indexedDBHelper.saveDataStatus('status', { id: 1, status: newStatus });
+},
     logoutUser() {
       this.$store.dispatch("logout");
     },
@@ -264,7 +292,25 @@ export default {
         this.changeSecondarySidebarProperties();
       }
     }
+   
+//     async mounted() {
+//   const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 2);
+//   const data = await indexedDBHelper.getData('status');
+//   this.status = data.length > 0 ? data[0].status : 'off';
+//   console.log('Initial Status:', this.status);
+// }
+  },
+  async mounted() {
+  const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 2);
+  const data = await indexedDBHelper.getData('status');
+  
+  if (data.length > 0) {
+    this.status = data[0].status;
+  } else {
+    this.status = 'off'; // Default to 'off' if no data
   }
+
+}
 };
 </script>
 

@@ -1,4 +1,4 @@
-const cacheName = 'your-cache-name';
+const cacheName = 'offline';
 
 const filesToCache = [
   '/',
@@ -13,7 +13,6 @@ const filesToCache = [
   '/app/adjustments/store',
   '/app/quotations/list',
   '/app/quotations/store',
-  '/app/sale_return/list',
   '/app/sale_return/list',
   '/app/transfers/list',
   '/app/transfers/store',
@@ -32,9 +31,44 @@ self.addEventListener('install', function (event) {
   event.waitUntil(preLoad());
 });
 
+// IndexedDB Helper Class
+class IndexedDBHelper {
+  constructor(dbName, dbVersion) {
+    this.dbName = dbName;
+    this.dbVersion = dbVersion;
+    this.dbPromise = this.openDatabase();
+  }
+
+  async openDatabase() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, this.dbVersion);
+      request.onupgradeneeded = event => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains('products')) {
+          db.createObjectStore('products', { keyPath: 'id', autoIncrement: true });
+        }
+      };
+      request.onsuccess = event => resolve(event.target.result);
+      request.onerror = event => reject(event.target.error);
+    });
+  }
+
+  async getData(storeName) {
+    const db = await this.dbPromise;
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(storeName, 'readonly');
+      const store = transaction.objectStore(storeName);
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+}
+
 async function loadDataFromIndexedDBProducts() {
-  const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
-  const data = await indexedDBHelper.getData();
+  const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 2);
+  const data = await indexedDBHelper.getData('products');
+
   if (data && data.length > 0) {
     return new Response(JSON.stringify(data), {
       headers: {
@@ -52,7 +86,7 @@ async function loadDataFromIndexedDBProducts() {
 self.addEventListener('fetch', function (event) {
   const requestUrl = new URL(event.request.url);
 
-  // Check if the intercepted request URL matches the desired URL
+  // Serve from IndexedDB if offline and requesting product list
   if (requestUrl.pathname === '/app/products/list' && !navigator.onLine) {
     event.respondWith(loadDataFromIndexedDBProducts());
   } else {
@@ -60,13 +94,27 @@ self.addEventListener('fetch', function (event) {
   }
 });
 
+// Check response function
 async function checkResponse(request) {
+  // Skip caching for requests from chrome-extension
+  if (request.url.startsWith('chrome-extension://')) {
+    return fetch(request);
+  }
+
+  // Skip caching for non-GET requests
+  if (request.method !== 'GET') {
+    return fetch(request);
+  }
+
   try {
     const response = await fetch(request);
-    if (response && response.status !== 404 && request.method === 'GET') {
+
+    // Cache successful GET responses that are not 404
+    if (response && response.status !== 404) {
       const cache = await caches.open(cacheName);
       await cache.put(request, response.clone());
     }
+
     return response;
   } catch (error) {
     console.error('Error fetching from network:', error);
@@ -78,7 +126,6 @@ async function checkResponse(request) {
 
 self.addEventListener('activate', function (event) {
   console.log('Service Worker Activated');
-
   event.waitUntil(
     caches.keys().then(function (cacheNames) {
       return Promise.all(
@@ -89,5 +136,5 @@ self.addEventListener('activate', function (event) {
         })
       );
     })
-  );
+  );  
 });

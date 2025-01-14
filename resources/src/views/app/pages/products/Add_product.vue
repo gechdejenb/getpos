@@ -394,8 +394,8 @@
 <script>
 import VueUploadMultipleImage from "vue-upload-multiple-image";
 import VueTagsInput from "@johmun/vue-tags-input";
-import NProgress from "nprogress";
-import IndexedDBHelper from './IndexedDBHelper.js';
+import NProgress, { status } from "nprogress";
+import IndexedDBHelper from './../../../../IndexedDBHelper.js';
 
 export default {
   metaInfo: {
@@ -403,6 +403,8 @@ export default {
   },
   data() {
     return {
+          idbHelper: new IndexedDBHelper('ProductsDBs', 2),
+
       tag: "",
       len: 8,
       images: [],
@@ -437,7 +439,9 @@ export default {
         is_imei: false,
         not_selling: false,
       },
-      code_exist: ""
+      code_exist: "",
+      statuses:'on' 
+
     };
   },
 
@@ -517,23 +521,44 @@ export default {
     },
 
     //-------------- Product Get Elements
-    GetElements() {
-      axios
-        .get("products/create")
-        .then(response => {
-          this.categories = response.data.categories;
-          this.brands = response.data.brands;
-          this.units = response.data.units;
-          this.isLoading = false;
-        })
-        .catch(response => {
-          setTimeout(() => {
-            this.isLoading = false;
-          }, 500);
-          this.makeToast("danger", this.$t("InvalidData"), this.$t("Failed"));
-        });
-    },
+    // GetElements() {
+    //   axios
+    //     .get("products/create")
+    //     .then(response => {
+    //       this.categories = response.data.categories;
+    //       this.brands = response.data.brands;
+    //       this.units = response.data.units;
+    //       this.isLoading = false;
+    //     })
+    //     .catch(response => {
+    //       setTimeout(() => {
+    //         this.isLoading = false;
+    //       }, 500);
+    //       this.makeToast("danger", this.$t("InvalidData"), this.$t("Failed"));
+    //     });
+    // },
+    async GetElements() {
+  axios
+    .get("products/create")
+    .then(response => {
+      this.categories = response.data.categories;
+      this.brands = response.data.brands;
+      this.units = response.data.units;
 
+      // Save categories, brands, and units to IndexedDB
+      this.idbHelper.saveData('categories', this.categories);
+      this.idbHelper.saveData('brands', this.brands);
+      this.idbHelper.saveData('units', this.units);
+
+      this.isLoading = false;
+    })
+    .catch(response => {
+      setTimeout(() => {
+        this.isLoading = false;
+      }, 500);
+      this.makeToast("danger", this.$t("InvalidData"), this.$t("Failed"));
+    });
+},
     //---------------------- Get Sub Units with Unit id ------------------------------\\
     Get_Units_SubBase(value) {
       axios
@@ -549,66 +574,168 @@ export default {
       this.Get_Units_SubBase(value);
     },
     async syncDataWhenOnline() {
-      if (navigator.onLine) {
-        const offlineProductData = JSON.parse(localStorage.getItem("offlineProductData"));
-        if (offlineProductData) {
-          try {
-            const response = await axios.post("products", offlineProductData);
-            console.log('Data synchronized with server:', response.data);
-            localStorage.removeItem("offlineProductData");
-            this.makeToast(
-              "success",
-              this.$t("Product data synchronized with the server."),
-              this.$t("Online")
-            );
-          } catch (error) {
-            console.error('Error synchronizing data:', error);
-            this.makeToast(
-              "danger",
-              this.$t("Error synchronizing product data with the server."),
-              this.$t("Online")
-            );
-          }
-        }
+  if (navigator.onLine) {
+    const offlineProductData = JSON.parse(localStorage.getItem("offlineProductData"));
+    if (offlineProductData) {
+      try {
+        const response = await axios.post("products", offlineProductData);
+        console.log('Data synchronized with server:', response.data);
+        localStorage.removeItem("offlineProductData");
+        this.makeToast(
+          "success",
+          this.$t("Product data synchronized with the server."),
+          this.$t("Online")
+        );
+      } catch (error) {
+        console.error('Error synchronizing data:', error);
+        this.makeToast(
+          "danger",
+          this.$t("Error synchronizing product data with the server."),
+          this.$t("Online")
+        );
       }
-    },
+    }
+
+    // Check if product data is already saved in IndexedDB
+    const idbHelper = new IndexedDBHelper('ProductsDBs', 2, 'products');
+    const products = await idbHelper.getData();
+    if (products.length > 0) {
+      console.log('Products already saved in IndexedDB, skipping request to server');
+      return;
+    }
+
+    // If product data is not saved in IndexedDB, send request to server
+    try {
+      const response = await axios.get("products");
+      console.log('Products retrieved from server:', response.data);
+      // Save products to IndexedDB
+      await idbHelper.saveData(response.data);
+    } catch (error) {
+      console.error('Error retrieving products from server:', error);
+    }
+  }
+},
 
     //------------------------------ Create new Product ------------------------------\\
-   // In your Create_Product method
-async Create_Product() {
-  NProgress.start();
-  this.SubmitProcessing = true;
+//------------------------------ Create new Product ------------------------------\\
+// async Create_Product() {
+//   NProgress.start();
+//   this.SubmitProcessing = true;
 
-  // Append product fields to FormData for submitting to a server
+//   // Append product fields to FormData for submitting to a server
+//   let formData = new FormData();
+//   Object.keys(this.product).forEach(key => {
+//     formData.append(key, this.product[key]);
+//   });
+
+//   const idbHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
+//   try {
+//     // Save category, brand, and unit data to IndexedDB
+//     await idbHelper.saveData(this.categories, 'categories');
+//     await idbHelper.saveData(this.brands, 'brands');
+//     await idbHelper.saveData(this.units, 'units');
+
+//     // Save product data to IndexedDB
+//     await idbHelper.saveData([this.product]); // Pass the product as an array
+//     try {
+//       const response = await axios.post("products", formData);
+//       this.makeToast("success", "Successfully Created", "Success");
+//       this.$router.push({ name: "index_products" });
+//     } catch (error) {
+//       console.error("Error creating product on server", error);
+//       this.makeToast("error", "Error creating product on server", "Failed");
+//     }
+//   } catch (error) {
+//     console.error("Error saving to IndexedDB", error);
+//     this.makeToast("error", "Save Local Failed", "Failed !");
+//   } finally {
+//     NProgress.done();
+//     this.SubmitProcessing = false;
+//   }
+// }
+//------------------------------ Create new Product ------------------------------\\
+// async Create_Product() {
+//   NProgress.start();
+//   this.SubmitProcessing = true;
+
+//   // Append product fields to FormData for submitting to a server
+//   let formData = new FormData();
+//   Object.keys(this.product).forEach(key => {
+//     formData.append(key, this.product[key]);
+//   });
+
+//   // Append images to FormData
+//   this.images.forEach((image, index) => {
+//     formData.append(`images[${index}]`, image);
+//   });
+
+//   try {
+//     const response = await axios.post("products", formData);
+//     this.makeToast("success", "Successfully Created", "Success");
+//     this.$router.push({ name: "index_products" });
+
+//     // Save product data to IndexedDB
+//     const idbHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
+//     await idbHelper.saveData([this.product]);
+//   } catch (error) {
+//     console.error("Error creating product on server", error);
+//     this.makeToast("error", "Error creating product on server", "Failed");
+
+//     // If no image, use /images/products/no-image.png as placeholder
+//     if (this.images.length === 0) {
+//       this.product.image = '../../images/products/no-image.png';
+//     }
+
+//     // Save product data to IndexedDB
+//     const idbHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
+//     await idbHelper.saveData([this.product]);
+//   } finally {
+//     NProgress.done();
+//     this.SubmitProcessing = false;
+//   }
+// }
+async Create_Product() {
   let formData = new FormData();
   Object.keys(this.product).forEach(key => {
     formData.append(key, this.product[key]);
   });
 
-  const idbHelper = new IndexedDBHelper('ProductsDBs', 1, 'products');
+  this.images.forEach((image, index) => {
+    formData.append(`images[${index}]`, image);
+  });
+
   try {
-    await indexedDBHelper.saveData(product);
-    this.makeToast("success", "Successfully Created", "Success");
-    this.$router.push({ name: "index_products" });
+    if (this.statuses == 'on') {
+      await axios.post("products", formData);
+      this.makeToast("success", "Successfully Created", "Success");
+      this.$router.push({ name: "index_products" });
+    } else if (this.statuses == 'off') {
+      await this.idbHelper.saveData('products', [this.product]);
+      this.makeToast("success", "Successfully Created", "Success");
+    }
   } catch (error) {
-    console.error("Error saving to IndexedDB", error);
-    this.makeToast("error", "Save Local Failed", "Failed");
+    console.error("Error creating product on server", error);
+
+    // Safely access error.response.data
+    if (error.response) {
+      this.makeToast("error", "Error creating product on server", "Failed");
+      console.log(error.response.data);
+
+      // Handle validation errors if they exist
+      if (error.response.status === 422) {
+        const errors = error.response.data.errors;
+        Object.keys(errors).forEach(key => {
+          console.log(`Error in ${key}: ${errors[key]}`);
+        });
+      }
+    } else {
+      // Handle cases where error.response is undefined
+      this.makeToast("error", "An unexpected error occurred", "Failed");
+    }
   } finally {
     NProgress.done();
     this.SubmitProcessing = false;
   }
-},
-async openIndexedDB() {
-  if (!('indexedDB' in window)) {
-    throw new Error("This browser doesn't support IndexedDB");
-  }
-  return await idb.openDB('ProductsDBs', 1, {
-    upgrade(db) {
-      if (!db.objectStoreNames.contains('products')) {
-        db.createObjectStore('products', { keyPath: 'id', autoIncrement: true });
-      }
-    }
-  });
 }
 ,
   async Submit_Product() {
@@ -652,10 +779,30 @@ async openIndexedDB() {
   },
 
   // Listen for online event and call syncDataWhenOnline
-  mounted() {
+  // mounted() {
+  //   window.addEventListener("online", this.syncDataWhenOnline);
+  // },
+  async mounted() {
     window.addEventListener("online", this.syncDataWhenOnline);
-  },
+    const indexedDbStatus = new IndexedDBHelper('ProductsDBs', 2);
 
+    try {
+        const dataStatus = await indexedDbStatus.getData('status');
+
+        // Assuming dataStatus is an array based on your initial code
+        if (Array.isArray(dataStatus) && dataStatus.length > 0) {
+            this.statuses = dataStatus[0].status; // Access status from the first object
+        } else {
+            this.statuses = 'off'; // Default to 'off' if no data
+        }
+    } catch (error) {
+        console.error('Error fetching status from IndexedDB:', error);
+        this.statuses = 'off'; // Set to a default value on error
+    }
+
+    console.log('Current Status:', this.statuses);
+}
+,
   beforeDestroy() {
     window.removeEventListener("online", this.syncDataWhenOnline);
   },

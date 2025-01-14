@@ -38,6 +38,18 @@
             </label>
           </div>
         </div>
+        <div class>
+          <div class="card-header">
+            <p class="mb-0">Connectivity Status</p>
+          </div>
+
+          <div class="card-body">
+            <label class="switch switch-primary mr-3 mt-2" v-b-popover.hover.left="popoverMessage">
+              <input type="checkbox" :checked="status === 'on'" @change="toggleStatus" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
 
 
       </vue-perfect-scrollbar>
@@ -47,6 +59,7 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import IndexedDBHelper from './../../../src/IndexedDBHelper.js';
 
 export default {
   data() {
@@ -56,12 +69,16 @@ export default {
         "en",
 
       ],
-
+      status: 'on',
     };
   },
 
   computed: {
     ...mapGetters(["getThemeMode", "getcompactLeftSideBarBgColor"]),
+    popoverMessage() {
+      return this.status === 'on' ? 'Online Mode' : 'Offline Mode';
+    },
+
   },
 
   methods: {
@@ -77,8 +94,29 @@ export default {
       this.$store.dispatch("language/setLanguage", locale);
       Fire.$emit("ChangeLanguage");
     },
+    popoverMessage() {
+      return this.status === 'on' ? 'Online Mode' : 'Offline Mode';
+    },
+    async toggleStatus(event) {
+  const newStatus = event.target.checked ? 'on' : 'off';
+  this.status = newStatus;
+  
+  const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 2);
+  await indexedDBHelper.saveDataStatus('status', { id: 1, status: newStatus });
+},
 
   },
+  async mounted() {
+  const indexedDBHelper = new IndexedDBHelper('ProductsDBs', 2);
+  const data = await indexedDBHelper.getData('status');
+  
+  if (data.length > 0) {
+    this.status = data[0].status;
+  } else {
+    this.status = 'on'; // Default to 'off' if no data
+  }
+
+}
 };
 </script>
 
