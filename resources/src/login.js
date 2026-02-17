@@ -58,6 +58,10 @@ window.axios.defaults.baseURL = '';
 
 window.axios.defaults.withCredentials = true;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+const csrfToken = document.head.querySelector('meta[name=\"csrf-token\"]');
+if (csrfToken) {
+  window.axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken.content;
+}
 
 axios.interceptors.response.use((response) => {
 
@@ -99,4 +103,3 @@ var login = new Vue({
   i18n,
   router:router,  
 });
-

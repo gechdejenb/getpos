@@ -20,8 +20,10 @@ async function checkResponse(request) {
   try {
     const response = await fetch(request);
     if (response && response.status !== 404) {
-      const cache = await caches.open(cacheName);
-      await cache.put(request, response.clone());
+      if (request.method === 'GET' && request.url.startsWith('http')) {
+        const cache = await caches.open(cacheName);
+        await cache.put(request, response.clone());
+      }
       return response;
     }
   } catch (error) {
@@ -30,6 +32,21 @@ async function checkResponse(request) {
   return caches.match(request).then(function (cachedResponse) {
     return cachedResponse || caches.match('offline.html');
   });
+}
+
+async function addToCache(request) {
+  if (request.method !== 'GET' || !request.url.startsWith('http')) return;
+  const cache = await caches.open(cacheName);
+  const response = await fetch(request);
+  if (response && response.status !== 404) {
+    await cache.put(request, response.clone());
+  }
+}
+
+async function returnFromCache(request) {
+  const cache = await caches.open(cacheName);
+  const cachedResponse = await cache.match(request);
+  return cachedResponse || caches.match('offline.html');
 }
 
 async function loadDataFromIndexedDBProducts() {
@@ -52,6 +69,10 @@ async function loadDataFromIndexedDBProducts() {
 self.addEventListener('fetch', function (event) {
   const requestUrl = new URL(event.request.url);
 
+  if (!['http:', 'https:'].includes(requestUrl.protocol)) {
+    return;
+  }
+
   // Check if the intercepted request URL matches the desired URL
   if (requestUrl.pathname === '/app/products/list' && !navigator.onLine) {
     event.respondWith(loadDataFromIndexedDBProducts());
@@ -61,7 +82,7 @@ self.addEventListener('fetch', function (event) {
       return returnFromCache(event.request);
     }));
 
-    if (!event.request.url.startsWith('http')) {
+    if (event.request.method === 'GET') {
       event.waitUntil(addToCache(event.request));
     }
   }

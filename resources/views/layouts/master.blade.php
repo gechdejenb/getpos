@@ -8,7 +8,7 @@
     <!-- PWA  -->
 <meta name="theme-color" content="#6777ef"/>
 <link rel="apple-touch-icon" href="{{ asset('logo.PNG') }}">
-<link rel="manifest" href="{{ asset('/manifest.json') }}">
+<link rel="manifest" href="{{ secure_asset('/manifest.json') }}">
     <link rel=icon href=/images/favicon.ico>
     <link rel="stylesheet" href="/css/master.css">
 
@@ -34,12 +34,12 @@
     </div>
     <div id="app">
     </div>
-    <script src="{{ asset('/sw.js') }}"></script>
+    <script src="{{ secure_asset('/sw.js') }}"></script>
     <script>
       if ("serviceWorker" in navigator) {
           // Register a service worker hosted at the root of the
           // site using the default scope.
-          navigator.serviceWorker.register("/sw.js",{ scope: '/' }).then(
+          navigator.serviceWorker.register(window.location.origin + "/sw.js",{ scope: '/' }).then(
           (registration) => {
             console.log("Service worker registration succeeded:", registration);
           },

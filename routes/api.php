@@ -361,6 +361,20 @@ Route::middleware(['auth:api', 'Is_Active'])->group(function () {
     Route::resource('transfers', 'TransferController');
     Route::post('transfers/delete/by_selection', 'TransferController@delete_by_selection');
 
+    //------------------------------- Restock API --------------------------\\
+    //--------------------------------------------------------------------\\
+    Route::get('restock/warehouses', 'RestockController@warehouses');
+    Route::get('restock/warehouses/{id}/products', 'RestockController@products');
+    Route::get('restock/requests', 'RestockController@index');
+    Route::post('restock/requests', 'RestockController@store');
+    Route::post('restock/requests/{id}/approve', 'RestockController@approve');
+    Route::post('restock/requests/{id}/reject', 'RestockController@reject');
+    Route::post('restock/requests/{id}/complete', 'RestockController@complete');
+
+    //------------------------------- Telegram Auth --------------------------\\
+    //--------------------------------------------------------------------\\
+    Route::post('telegram/request-auth', 'TelegramAuthController@requestAuth');
+
     //------------------------------- Users --------------------------\\
     //------------------------------------------------------------------\\
 
@@ -417,7 +431,11 @@ Route::middleware(['auth:api', 'Is_Active'])->group(function () {
     //-------------------------------  Print & PDF ------------------------\\
     //------------------------------------------------------------------\\
 
-    Route::get('sale_pdf/{id}', 'SalesController@Sale_PDF');
+Route::get('sale_pdf/{id}', 'SalesController@Sale_PDF');
+
+// Telegram webhook (no auth)
+Route::post('telegram/webhook', 'TelegramWebhookController@handle');
+Route::get('telegram/auth', 'TelegramAuthController@auth');
     Route::get('quote_pdf/{id}', 'QuotationsController@Quotation_pdf');
     Route::get('purchase_pdf/{id}', 'PurchasesController@Purchase_pdf');
     Route::get('return_sale_pdf/{id}', 'SalesReturnController@Return_pdf');

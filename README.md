@@ -68,6 +68,16 @@ $response->send();
 
 $kernel->terminate($request, $response);
 ```
+```bash
+// bootstrap/app.php
+$app = new Illuminate\Foundation\Application(
+    $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
+);
+
+// Laravel 8 way to override public path
+$app->instance('path.public', base_path());
+
+```
 
 ## Migrate Database
 

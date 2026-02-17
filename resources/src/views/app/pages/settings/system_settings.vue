@@ -245,7 +245,7 @@
                     <label class="checkbox checkbox-primary mb-3"><input type="checkbox" v-model="setting.is_invoice_footer"><h5>{{$t('invoice_footer')}} </h5><span class="checkmark"></span></label>
                   </b-col>
 
-                   <b-col md="6" sm="6" class="mt-4 mb-4" v-if="setting.is_invoice_footer">
+                  <b-col md="6" sm="6" class="mt-4 mb-4" v-if="setting.is_invoice_footer">
                   <validation-provider
                       name="invoice_footer"
                       :rules="{ required: true}"
@@ -265,6 +265,29 @@
                       </b-form-group>
                     </validation-provider>
                 </b-col>
+
+                  <!-- Telegram -->
+                  <b-col md="12" class="mt-4">
+                    <b-card no-body :header="$t('Telegram')">
+                      <b-card-body>
+                        <b-row>
+                          <b-col md="8" sm="12">
+                            <p class="mb-1">{{$t('TelegramConnectHelp')}}</p>
+                            <div id="telegram-login-widget"></div>
+                          </b-col>
+                          <b-col md="4" sm="12" class="text-right">
+                            <b-button
+                              variant="primary"
+                              :disabled="telegramLoading"
+                              @click="InitTelegramWidget"
+                            >
+                              {{ telegramLoading ? $t('Loading') : $t('ConnectTelegram') }}
+                            </b-button>
+                          </b-col>
+                        </b-row>
+                      </b-card-body>
+                    </b-card>
+                  </b-col>
 
                   <b-col md="12">
                     <b-form-group>
@@ -336,6 +359,9 @@ export default {
         is_invoice_footer:'',
         invoice_footer:'',
       },
+      telegramLoading: false,
+      telegramAuthUrl: "",
+      telegramBotUsername: "",
 
     };
   },
@@ -343,6 +369,32 @@ export default {
   methods: {
     ...mapActions(["refreshUserPermissions"]),
 
+    InitTelegramWidget() {
+      this.telegramLoading = true;
+      axios
+        .post("telegram/request-auth")
+        .then(response => {
+          this.telegramAuthUrl = response.data.authUrl;
+          this.telegramBotUsername = response.data.botUsername;
+
+          const container = document.getElementById("telegram-login-widget");
+          if (container) {
+            container.innerHTML = "";
+            const script = document.createElement("script");
+            script.async = true;
+            script.src = "https://telegram.org/js/telegram-widget.js?22";
+            script.setAttribute("data-telegram-login", this.telegramBotUsername);
+            script.setAttribute("data-size", "large");
+            script.setAttribute("data-auth-url", this.telegramAuthUrl);
+            script.setAttribute("data-request-access", "write");
+            container.appendChild(script);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          this.telegramLoading = false;
+        });
+    },
 
       SetLocal(locale) {
       this.$i18n.locale = locale;
